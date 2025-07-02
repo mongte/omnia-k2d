@@ -16,6 +16,14 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["development"]
+    "customConditions": ["development"],
+    "baseUrl": ".",
+    "paths": {
+      "@omnia-k2d/shadcn-ui": ["libs/shadcn-ui/src/index.ts"],
+      "@omnia-k2d/shadcn-ui/*": ["libs/shadcn-ui/src/*"],
+      "@omnia-k2d/shadcn-ui/components/ui": [
+        "libs/shadcn-ui/src/components/ui/index.ts"
+      ]
+    }
   }
 }

@@ -6,7 +6,11 @@
     "emitDeclarationOnly": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -17,23 +21,25 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": [
+        "./src/*"
+      ],
       "@omnia-k2d/shadcn-ui": ["../../libs/shadcn-ui/src/index.ts"],
       "@omnia-k2d/shadcn-ui/*": ["../../libs/shadcn-ui/src/*"],
       "@omnia-k2d/shadcn-ui/components/ui": ["../../libs/shadcn-ui/src/components/ui/index.ts"]
     },
     "outDir": "dist",
-    "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "../../apps/my-daily/.next/types/**/*.ts",
+    "../../dist/apps/my-daily/.next/types/**/*.ts",
+    "next-env.d.ts",
     "src/**/*.js",
     "src/**/*.jsx",
-    "../../apps/lookahead/.next/types/**/*.ts",
-    "../../dist/apps/lookahead/.next/types/**/*.ts",
-    "next-env.d.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
   ],
   "exclude": [
     "out-tsc",
