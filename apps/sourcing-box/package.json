@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "next": "~15.2.4",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "@omnia-k2d/shadcn-ui": "workspace:*",
+    "cheerio": "^1.1.0",
+    "puppeteer": "^24.11.2",
+    "xlsx": "^0.18.5"
   }
 }

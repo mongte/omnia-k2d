@@ -20,10 +20,30 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./src/*"
-      ]
+        "./src/*",
+      ],
+      "@libs/*": [
+        "../../libs/*"
+      ],
+      "@widgets/*": [
+        "src/screens/*"
+      ],
+      "@screens/*": [
+        "./src/screens/*"
+      ],
+      "@features/*": [
+        "./src/features/*"
+      ],
+      "@entities/*": [
+        "./src/entities/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ],
+      
     },
     "outDir": "dist",
     "rootDir": "src",

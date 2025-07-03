@@ -12,3 +12,16 @@ export {
 export { Input } from './input'
 export { Label } from './label'
 export { Textarea } from './textarea'
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from './table'
+export { Badge, badgeVariants } from './badge'
+export { Progress } from './progress'
+export { Separator } from './separator'

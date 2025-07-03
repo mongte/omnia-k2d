@@ -10,9 +10,6 @@
       "path": "./apps/my-daily"
     },
     {
-      "path": "./shared"
-    },
-    {
       "path": "./apps/sourcing-box"
     }
   ]

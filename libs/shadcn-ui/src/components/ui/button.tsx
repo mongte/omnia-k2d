@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -20,15 +18,22 @@ const buttonVariants = cva(
         neumorphic: "bg-[#fafbfc] text-[#374151] rounded-[0.3rem] shadow-[1px_1px_1px_rgba(0,0,0,0.1),_-1px_-1px_1px_rgba(255,255,255,1)] hover:shadow-[1px_1px_1px_rgba(0,0,0,0.12),_-1px_-1px_1px_rgba(255,255,255,1)] active:shadow-[inset_1px_1px_1px_rgba(0,0,0,0.08),_inset_-1px_-1px_1px_rgba(255,255,255,0.9)] border border-transparent bg-gradient-to-br from-white/60 to-gray-200/30 bg-clip-padding transition-all duration-300",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
       },
+      align: {
+        default: "inline-flex items-center justify-center",
+        start: "justify-start",
+        end: "justify-end",
+        between: "justify-between",
+        around: "justify-around",
+      },
     },
     defaultVariants: {
       variant: "default",
-      size: "default",
+      size: "sm",
+      align: "default", // justify-center가 기본값으로 유지됨
     },
   }
 )
@@ -37,6 +42,7 @@ function Button({
   className,
   variant,
   size,
+  align,
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
@@ -48,7 +54,7 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, align, className }))}
       {...props}
     />
   )
