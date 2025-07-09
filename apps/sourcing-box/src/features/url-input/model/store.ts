@@ -1,10 +1,17 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { Product, CrawlStatus } from '@entities/product'
 
 interface UrlInputState {
   urls: string[]
   isValidating: boolean
   errors: Record<number, string>
+  
+  // 크롤링 상태
+  crawlStatus: CrawlStatus
+  crawledProducts: Product[]
+  crawlErrors: string[]
+  crawlLogs: string[]
   
   // Actions
   addUrl: () => void
@@ -14,6 +21,14 @@ interface UrlInputState {
   validateUrl: (index: number, url: string) => void
   clearAll: () => void
   getValidUrls: () => string[]
+  
+  // 크롤링 Actions
+  setCrawlStatus: (status: Partial<CrawlStatus>) => void
+  setCrawledProducts: (products: Product[]) => void
+  addCrawlError: (error: string) => void
+  addCrawlLog: (log: string) => void
+  clearCrawlData: () => void
+  resetCrawlStatus: () => void
 }
 
 export const useUrlInputStore = create<UrlInputState>()(
@@ -22,6 +37,18 @@ export const useUrlInputStore = create<UrlInputState>()(
       urls: [''],
       isValidating: false,
       errors: {},
+      
+      // 크롤링 상태 초기값
+      crawlStatus: {
+        isRunning: false,
+        progress: 0,
+        currentUrl: '',
+        completedUrls: 0,
+        totalUrls: 0,
+      },
+      crawledProducts: [],
+      crawlErrors: [],
+      crawlLogs: [],
 
       addUrl: () => {
         set((state) => ({
@@ -107,6 +134,49 @@ export const useUrlInputStore = create<UrlInputState>()(
         return urls.filter((url, index) => 
           url.trim() && !errors[index]
         )
+      },
+
+      // 크롤링 Actions
+      setCrawlStatus: (status: Partial<CrawlStatus>) => {
+        set((state) => ({
+          crawlStatus: { ...state.crawlStatus, ...status }
+        }))
+      },
+
+      setCrawledProducts: (products: Product[]) => {
+        set({ crawledProducts: products })
+      },
+
+      addCrawlError: (error: string) => {
+        set((state) => ({
+          crawlErrors: [...state.crawlErrors, error]
+        }))
+      },
+
+      addCrawlLog: (log: string) => {
+        set((state) => ({
+          crawlLogs: [...state.crawlLogs, `${new Date().toLocaleTimeString()} - ${log}`]
+        }))
+      },
+
+      clearCrawlData: () => {
+        set({
+          crawledProducts: [],
+          crawlErrors: [],
+          crawlLogs: []
+        })
+      },
+
+      resetCrawlStatus: () => {
+        set({
+          crawlStatus: {
+            isRunning: false,
+            progress: 0,
+            currentUrl: '',
+            completedUrls: 0,
+            totalUrls: 0,
+          }
+        })
       }
     }),
     { name: 'url-input-store' }

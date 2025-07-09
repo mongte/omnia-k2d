@@ -2,14 +2,19 @@
 
 import { Badge, Card, CardContent, CardHeader, CardTitle, Button } from '@omnia-k2d/shadcn-ui'
 import { Globe, X } from 'lucide-react'
-import { UrlListItem } from '../index'
+
+export interface UrlListItem {
+  id: string;
+  url: string;
+  status: 'pending' | 'crawling' | 'completed' | 'error';
+}
 
 interface UrlListProps {
   urls: UrlListItem[]
   onRemove: (id: string) => void
 }
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string, variant: 'secondary' | 'default' | 'outline' | 'destructive' }> = {
   pending: { label: '대기', variant: 'secondary' as const },
   crawling: { label: '크롤링 중', variant: 'default' as const },
   completed: { label: '완료', variant: 'outline' as const },

@@ -11,7 +11,14 @@
     "lookahead:start": "nx start lookahead --port=3002",
     "sourcing-box:dev": "nx dev sourcing-box --port=3003",
     "sourcing-box:build": "nx build sourcing-box",
-    "sourcing-box:start": "nx start sourcing-box --port=3003"
+    "sourcing-box:start": "nx start sourcing-box --port=3003",
+    "build:sourcing-box": "nx build sourcing-box --prod",
+    "build:my-daily": "nx build my-daily --prod",
+    "build:lookahead": "nx build lookahead --prod",
+    "deploy:sourcing-box": "firebase deploy --only hosting:sourcing-box",
+    "deploy:my-daily": "npm run build:my-daily && firebase deploy --only hosting:my-daily",
+    "deploy:lookahead": "npm run build:lookahead && firebase deploy --only hosting:lookahead",
+    "deploy:all": "npm run build:my-daily && npm run build:lookahead && firebase deploy --only hosting"
   },
   "private": true,
   "dependencies": {
@@ -21,6 +28,7 @@
     "@supabase/supabase-js": "^2.50.0",
     "@tanstack/react-query": "^5.81.5",
     "@tanstack/react-query-devtools": "^5.81.5",
+    "axios": "^1.10.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.525.0",

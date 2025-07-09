@@ -10,6 +10,25 @@ const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gd.image-qoo10.jp',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'dp.image-qoo10.jp',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'simage-qoo10.qoo10.jp',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 const plugins = [
