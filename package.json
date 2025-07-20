@@ -3,9 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "my-daily:dev": "nx dev my-daily --port=3001",
-    "my-daily:build": "nx build my-daily",
-    "my-daily:start": "nx start my-daily --port=3001",
+    
     "lookahead:dev": "nx dev lookahead --port=3002",
     "lookahead:build": "nx build lookahead",
     "lookahead:start": "nx start lookahead --port=3002",
@@ -13,12 +11,12 @@
     "sourcing-box:build": "nx build sourcing-box",
     "sourcing-box:start": "nx start sourcing-box --port=3003",
     "build:sourcing-box": "nx build sourcing-box --prod",
-    "build:my-daily": "nx build my-daily --prod",
+    
     "build:lookahead": "nx build lookahead --prod",
     "deploy:sourcing-box": "firebase deploy --only hosting:sourcing-box",
-    "deploy:my-daily": "npm run build:my-daily && firebase deploy --only hosting:my-daily",
+    
     "deploy:lookahead": "npm run build:lookahead && firebase deploy --only hosting:lookahead",
-    "deploy:all": "npm run build:my-daily && npm run build:lookahead && firebase deploy --only hosting"
+    "deploy:all": "npm run build:lookahead && firebase deploy --only hosting"
   },
   "private": true,
   "dependencies": {

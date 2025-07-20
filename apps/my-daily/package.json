@@ -1,8 +1,0 @@
-{
-  "name": "@omnia-k2d/my-daily",
-  "version": "0.0.1",
-  "private": true,
-  "dependencies": {
-    "@omnia-k2d/shadcn-ui": "workspace:*"
-  }
-}
