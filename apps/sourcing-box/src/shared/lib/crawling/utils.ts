@@ -45,7 +45,7 @@ export const fetchHtml = async (
         validateStatus: (status: number) => status < 500, // 4xx는 통과, 5xx만 throw
       });
       return response.data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       lastError = err;
       if (attempt < maxRetries) {
         await randomDelay(1000, 5000);

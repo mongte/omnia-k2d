@@ -39,22 +39,114 @@ export const MainPage = () => {
     crawledProducts,
     crawlLogs,
     crawlErrors,
+    inputMode,
     addUrl,
     removeUrl,
     updateUrl,
     validateUrl,
-    getValidUrls,
+    getCrawlRequest,
+    parseBulkUrls,
   } = useUrlInputStore();
 
   const { startCrawling, isLoading } = useCrawling();
 
   const handleStartCrawling = () => {
-    const validUrls = getValidUrls();
-    if (validUrls.length === 0) {
+    const validUrlsCount = getValidUrlsCount();
+    if (validUrlsCount === 0) {
       alert('유효한 URL을 하나 이상 입력해주세요.');
       return;
     }
-    startCrawling(validUrls);
+    const request = getCrawlRequest();
+    console.log('🚀 handleStartCrawling - request:', JSON.stringify(request));
+    startCrawling(request);
+  };
+
+  // 현재 입력 모드에 따른 URL 개수 계산
+  const getTotalUrls = () => {
+    if (inputMode === 'individual') {
+      // 개별 입력에서도 콤마로 구분된 URL 감지
+      let totalCount = 0;
+      urls.forEach(url => {
+        if (url.trim()) {
+          if (url.includes(',')) {
+            // 콤마가 포함된 경우 분리해서 개수 계산
+            const splitUrls = url.split(',').map(u => u.trim()).filter(u => u.length > 0);
+            totalCount += splitUrls.length;
+          } else {
+            totalCount += 1;
+          }
+        }
+      });
+      console.log('📊 getTotalUrls - individual mode total:', totalCount);
+      return totalCount;
+    } else {
+      // bulk 모드에서 store의 정규화된 함수 사용
+      const parsedUrls = parseBulkUrls();
+      console.log('📊 getTotalUrls - parsedUrls:', JSON.stringify(parsedUrls));
+      return parsedUrls.length;
+    }
+  };
+
+  const getValidUrlsCount = () => {
+    if (inputMode === 'individual') {
+      // 개별 입력에서도 콤마로 구분된 URL을 고려한 유효성 검사
+      let validCount = 0;
+      urls.forEach(url => {
+        if (url.trim()) {
+          if (url.includes(',')) {
+            // 콤마가 포함된 경우 분리해서 각각 유효성 검사
+            const splitUrls = url.split(',')
+              .map(u => {
+                let cleanUrl = u.trim();
+                try {
+                  // URL 디코딩
+                  cleanUrl = decodeURIComponent(cleanUrl);
+                  cleanUrl = cleanUrl.trim();
+                } catch (error) {
+                  console.warn('URL 디코딩 실패:', cleanUrl, error);
+                }
+                return cleanUrl;
+              })
+              .filter(u => u.length > 0);
+            
+            splitUrls.forEach(splitUrl => {
+              if (/^https?:\/\/.+/.test(splitUrl) && /qoo10\.(jp|co\.kr|sg)/.test(splitUrl)) {
+                validCount++;
+              }
+            });
+          } else {
+            // 단일 URL 유효성 검사
+            let cleanUrl = url.trim();
+            try {
+              cleanUrl = decodeURIComponent(cleanUrl);
+              cleanUrl = cleanUrl.trim();
+            } catch (error) {
+              console.warn('URL 디코딩 실패:', cleanUrl, error);
+            }
+            
+            if (/^https?:\/\/.+/.test(cleanUrl) && /qoo10\.(jp|co\.kr|sg)/.test(cleanUrl)) {
+              validCount++;
+            }
+          }
+        }
+      });
+      console.log('📊 getValidUrlsCount - individual mode valid:', validCount);
+      return validCount;
+    } else {
+      // bulk 모드에서 store의 정규화된 함수 사용
+      const parsedUrls = parseBulkUrls();
+      
+      // 정규화된 URL들에 대해 유효성 검사
+      const validUrls = parsedUrls.filter(url => {
+        // 기본적인 URL 형식 검증
+        return /^https?:\/\/.+/.test(url) && /qoo10\.(jp|co\.kr|sg)/.test(url);
+      });
+      
+      console.log('📊 getValidUrlsCount - parsedUrls:', JSON.stringify(parsedUrls));
+      console.log('📊 getValidUrlsCount - validUrls:', JSON.stringify(validUrls));
+      
+      return validUrls.length;
+    }
   };
 
   const exportToExcel = () => {
@@ -221,10 +313,10 @@ export const MainPage = () => {
               <div className="pt-2">
                 <Label className="text-sm font-medium mb-3 block">크롤링 상태</Label>
                 <div className="text-sm text-gray-600 space-y-1">
-                  <p>입력된 URL: {urls.filter(url => url.trim()).length}개</p>
-                  <p>유효한 URL: {getValidUrls().length}개</p>
-                  {crawlStatus.totalUrls > 0 && (
-                    <p>완료: {crawlStatus.completedUrls}/{crawlStatus.totalUrls}</p>
+                  <p>입력된 URL: {getTotalUrls()}개</p>
+                  <p>유효한 URL: {getValidUrlsCount()}개</p>
+                  {getValidUrlsCount() > 0 && (
+                    <p>완료: {crawlStatus.completedUrls}/{crawlStatus.totalUrls > 0 ? crawlStatus.totalUrls : getValidUrlsCount()}</p>
                   )}
                 </div>
               </div>

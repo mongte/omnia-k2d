@@ -1,13 +1,13 @@
 import { CrawlRequest, CrawlResponse, Product } from '@entities/product';
 import { extractProductsFromMainRanking, extractReviewCountFromProductPage } from '@entities/product/lib/product-extractor';
-import { randomDelay, fetchHtml, saveHtmlToResource } from '@shared/lib/crawling/utils';
+import { fetchHtml, randomDelay } from '@shared/lib/crawling/utils';
 import * as cheerio from 'cheerio';
 
 // 🌐 크롤링 서비스 클래스 (Cheerio-only)
 export class CrawlingService {
   // 🚀 메인 크롤링 실행 함수
   async crawlUrls(request: CrawlRequest): Promise<CrawlResponse> {
-    const { urls } = request;
+    const { urls, productsPerUrl = 5 } = request;
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
       throw new Error('URLs are required');
     }
@@ -22,8 +22,8 @@ export class CrawlingService {
         // HTML 받아오기 (재시도/딜레이 내장)
         const html = await fetchHtml(url, 3, 15000);
         const $ = cheerio.load(html);
-        // main_ranking 영역에서 상품 추출
-        const products = await extractProductsFromMainRanking($);
+        // main_ranking 영역에서 상품 추출 (지정된 개수만큼)
+        const products = await extractProductsFromMainRanking($, productsPerUrl);
         console.log(`📦 1단계에서 추출된 상품 수: ${products.length}`);
         // 🌟 2단계: 각 상품의 리뷰 수 크롤링
         const productsWithReviews = await this.enrichProductsWithReviews(products);
@@ -59,7 +59,6 @@ export class CrawlingService {
           console.log(`⭐ 상품 ${i + 1}/${products.length} 리뷰 크롤링: ${product.productName}, url:${product.productUrl}`);
           // 상품 상세 페이지 HTML 받아오기
           const html = await fetchHtml(product.productUrl, 3, 15000);
-          await saveHtmlToResource(html ?? '', `product_${i}`);
           const $ = cheerio.load(html);
           // 리뷰 수 추출
           const reviewCount = extractReviewCountFromProductPage($);

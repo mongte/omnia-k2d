@@ -17,6 +17,7 @@ export interface Product {
 // 크롤링 관련 타입 추가
 export interface CrawlRequest {
   urls: string[];
+  productsPerUrl?: number; // 각 URL당 추출할 상품 개수 (기본값: 5개)
 }
 
 export interface CrawlResponse {

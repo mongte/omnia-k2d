@@ -2,10 +2,6 @@ import { useMutation } from '@tanstack/react-query';
 import { CrawlRequest, CrawlResponse } from '@entities/product';
 import { useUrlInputStore } from '@features/url-input/model/store';
 
-interface CrawlMutationData {
-  urls: string[];
-}
-
 export const useCrawling = () => {
   const {
     setCrawlStatus,
@@ -16,10 +12,8 @@ export const useCrawling = () => {
     resetCrawlStatus
   } = useUrlInputStore();
 
-  const mutation = useMutation<CrawlResponse, Error, CrawlMutationData>({
-    mutationFn: async ({ urls }: CrawlMutationData) => {
-      const request: CrawlRequest = { urls };
-      
+  const mutation = useMutation<CrawlResponse, Error, CrawlRequest>({
+    mutationFn: async (request: CrawlRequest) => {
       const response = await fetch('/api/crawl', {
         method: 'POST',
         headers: {
@@ -36,7 +30,8 @@ export const useCrawling = () => {
       return response.json();
     },
     
-    onMutate: ({ urls }) => {
+    onMutate: (request: CrawlRequest) => {
+      const { urls } = request;
       // 크롤링 시작 시 상태 초기화
       clearCrawlData();
       setCrawlStatus({
@@ -46,7 +41,7 @@ export const useCrawling = () => {
         completedUrls: 0,
         totalUrls: urls.length,
       });
-      addCrawlLog('크롤링을 시작합니다...');
+      addCrawlLog(`크롤링을 시작합니다... (URL당 ${request.productsPerUrl || 5}개 상품)`);
     },
 
     onSuccess: (data: CrawlResponse) => {
@@ -97,18 +92,18 @@ export const useCrawling = () => {
   });
 
   // 크롤링 시작 함수
-  const startCrawling = (urls: string[]) => {
-    if (urls.length === 0) {
+  const startCrawling = (request: CrawlRequest) => {
+    if (request.urls.length === 0) {
       addCrawlError('유효한 URL이 없습니다.');
       return;
     }
 
-    addCrawlLog(`${urls.length}개의 URL을 크롤링 합니다.`);
-    urls.forEach((url, index) => {
+    addCrawlLog(`${request.urls.length}개의 URL을 크롤링 합니다.`);
+    request.urls.forEach((url, index) => {
       addCrawlLog(`${index + 1}. ${url}`);
     });
 
-    mutation.mutate({ urls });
+    mutation.mutate(request);
   };
 
   return {

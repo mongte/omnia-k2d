@@ -2,6 +2,7 @@
   "hosting": [
     {
       "target": "sourcing-box",
+      "source": "apps/sourcing-box",
       "ignore": [
         "firebase.json",
         "**/.*",

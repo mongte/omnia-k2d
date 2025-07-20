@@ -4,7 +4,7 @@ import { Product, RawProductData } from '../model/types';
 import { extractBrandName, parseDiscountRate, parsePrice, parseSalesCount } from './data-parser';
 
 // 📦 메인 상품 추출 함수
-export const extractProductsFromMainRanking = async ($: cheerio.CheerioAPI): Promise<Product[]> => {
+export const extractProductsFromMainRanking = async ($: cheerio.CheerioAPI, limit = 5): Promise<Product[]> => {
   const products: Product[] = [];
   // 직접적으로 고정 선택자 사용
   const productElements = $(`.main_ranking #ul_minishop_ranking > li`);
@@ -16,8 +16,8 @@ export const extractProductsFromMainRanking = async ($: cheerio.CheerioAPI): Pro
     return products;
   }
 
-  // 최대 5개만 추출
-  productElements.slice(0, 5).each((index, element) => {
+  // 지정된 개수만큼 추출
+  productElements.slice(0, limit).each((index, element) => {
     try {
       const $element = $(element);
       // 상품 정보 추출
@@ -56,6 +56,7 @@ export const extractProductsFromMainRanking = async ($: cheerio.CheerioAPI): Pro
 };
 
 // 🏷️ 개별 상품 데이터 추출 함수
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const extractProductData = ($element: cheerio.Cheerio<any>): RawProductData => {
   // Qoo10 실제 구조에 맞춘 정확한 추출
 
