@@ -6,11 +6,7 @@
     "emitDeclarationOnly": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -22,28 +18,13 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*",
-      ],
-      "@libs/*": [
-        "../../libs/*"
-      ],
-      "@widgets/*": [
-        "src/screens/*"
-      ],
-      "@screens/*": [
-        "./src/screens/*"
-      ],
-      "@features/*": [
-        "./src/features/*"
-      ],
-      "@entities/*": [
-        "./src/entities/*"
-      ],
-      "@shared/*": [
-        "./src/shared/*"
-      ],
-      
+      "@/*": ["./src/*"],
+      "@libs/*": ["../../libs/*"],
+      "@widgets/*": ["src/screens/*"],
+      "@screens/*": ["./src/screens/*"],
+      "@features/*": ["./src/features/*"],
+      "@entities/*": ["./src/entities/*"],
+      "@shared/*": ["./src/shared/*"]
     },
     "outDir": "dist",
     "rootDir": "src",
@@ -70,5 +51,10 @@
     "eslint.config.js",
     "eslint.config.cjs",
     "eslint.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../libs/shadcn-ui"
+    }
   ]
 }

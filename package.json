@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    
     "lookahead:dev": "nx dev lookahead --port=3002",
     "lookahead:build": "nx build lookahead",
     "lookahead:start": "nx start lookahead --port=3002",
@@ -11,10 +10,8 @@
     "sourcing-box:build": "nx build sourcing-box",
     "sourcing-box:start": "nx start sourcing-box --port=3003",
     "build:sourcing-box": "nx build sourcing-box --prod",
-    
     "build:lookahead": "nx build lookahead --prod",
     "deploy:sourcing-box": "firebase deploy --only hosting:sourcing-box",
-    
     "deploy:lookahead": "npm run build:lookahead && firebase deploy --only hosting:lookahead",
     "deploy:all": "npm run build:lookahead && firebase deploy --only hosting"
   },
@@ -23,12 +20,16 @@
     "@iconify/react": "^6.0.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.0.2",
+    "@remix-run/node": "^2.15.0",
+    "@remix-run/react": "^2.15.0",
+    "@remix-run/serve": "^2.15.0",
     "@supabase/supabase-js": "^2.50.0",
     "@tanstack/react-query": "^5.81.5",
     "@tanstack/react-query-devtools": "^5.81.5",
     "axios": "^1.10.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "isbot": "^4.4.0",
     "lucide-react": "^0.525.0",
     "next": "~15.2.4",
     "react": "19.0.0",
@@ -45,10 +46,14 @@
     "@next/eslint-plugin-next": "^15.2.4",
     "@nx/eslint": "21.1.2",
     "@nx/eslint-plugin": "21.1.2",
-    "@nx/js": "21.1.2",
+    "@nx/js": "21.3.0",
     "@nx/next": "21.1.2",
     "@nx/react": "21.1.2",
+    "@nx/remix": "^21.3.0",
+    "@nx/vite": "21.3.0",
+    "@nx/web": "21.3.0",
     "@nx/workspace": "21.1.2",
+    "@remix-run/dev": "^2.15.0",
     "@swc-node/register": "~1.9.1",
     "@swc/cli": "~0.6.0",
     "@swc/core": "~1.5.7",
@@ -71,7 +76,8 @@
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "tslib": "^2.3.0",
-    "typescript": "~5.7.2",
-    "typescript-eslint": "^8.19.0"
+    "typescript": "~5.8.2",
+    "typescript-eslint": "^8.19.0",
+    "vite": "^5.0.0"
   }
 }

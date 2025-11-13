@@ -11,6 +11,9 @@
     },
     {
       "path": "./apps/sourcing-box"
+    },
+    {
+      "path": "./libs/shadcn-ui"
     }
   ]
 }
