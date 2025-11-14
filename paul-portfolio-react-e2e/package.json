@@ -1,0 +1,10 @@
+{
+  "name": "@omnia-k2d/paul-portfolio-react-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@omnia-k2d/paul-portfolio-react"
+    ]
+  }
+}

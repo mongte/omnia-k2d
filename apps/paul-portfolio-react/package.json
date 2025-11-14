@@ -1,0 +1,16 @@
+{
+  "name": "@omnia-k2d/paul-portfolio-react",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@omnia-k2d/shadcn-ui": "workspace:*",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.525.0",
+    "next": "~15.2.4",
+    "next-themes": "^0.4.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "tailwind-merge": "^3.4.0"
+  }
+}

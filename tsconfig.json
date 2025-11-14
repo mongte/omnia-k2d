@@ -7,13 +7,16 @@
       "path": "./apps/lookahead"
     },
     {
-      "path": "./apps/my-daily"
-    },
-    {
       "path": "./apps/sourcing-box"
     },
     {
       "path": "./libs/shadcn-ui"
+    },
+    {
+      "path": "./paul-portfolio-react-e2e"
+    },
+    {
+      "path": "./paul-portfolio-react"
     }
   ]
 }
