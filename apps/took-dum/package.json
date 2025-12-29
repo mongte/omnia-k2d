@@ -1,0 +1,9 @@
+{
+  "name": "@omnia-k2d/took-dum",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@omnia-k2d/shadcn-ui": "workspace:*",
+    "framer-motion": "^11.15.0"
+  }
+}

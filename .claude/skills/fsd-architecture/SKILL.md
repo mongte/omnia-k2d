@@ -109,10 +109,10 @@ export { useFollowUser } from './model/useFollowUser';
 // ✅ 올바른 import (하위 레이어 참조)
 import { Button } from '@/shared/ui/button';
 import { User } from '@/entities/user';
-import { FollowButton } from '@/features/follow-user';
+import { FollowButton } from '@features/follow-user';
 
 // ❌ 잘못된 import (같은 레이어 또는 상위 레이어)
-import { LikeButton } from '@/features/like-post';  // features 간 참조 금지
+import { LikeButton } from '@features/like-post';  // features 간 참조 금지
 import { HomePage } from '@/pages/home';            // 하위가 상위 참조 금지
 ```
 
@@ -136,7 +136,7 @@ export const ProfilePage = () => (
 ```typescript
 // widgets/user-profile/ui/UserProfile.tsx
 import { UserCard } from '@/entities/user';
-import { FollowButton } from '@/features/follow-user';
+import { FollowButton } from '@features/follow-user';
 
 export const UserProfile = ({ userId }) => (
   <div>
@@ -160,7 +160,7 @@ shared/
 
 - ❌ `features/follow-user → features/like-post` (같은 레이어 참조)
 - ❌ `entities/user → features/follow-user` (하위가 상위 참조)
-- ❌ 직접 경로 import: `from './ui/Button'` 대신 `from '@/features/follow-user'` 사용
+- ❌ 직접 경로 import: `from './ui/Button'` 대신 `from '@features/follow-user'` 사용
 - ✅ 항상 공개 API(`index.ts`)를 통해 export
 - ✅ Shared는 비즈니스 로직 없이 범용적으로
 

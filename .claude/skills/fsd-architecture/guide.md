@@ -185,8 +185,8 @@ export { UserProfilePage } from './ui/UserProfilePage';
 ```typescript
 // widgets/user-profile/ui/UserProfile.tsx
 import { UserAvatar } from '@/entities/user';
-import { FollowButton } from '@/features/follow-user';
-import { EditProfileButton } from '@/features/edit-profile';
+import { FollowButton } from '@features/follow-user';
+import { EditProfileButton } from '@features/edit-profile';
 
 export const UserProfile = ({ userId }) => {
   return (
@@ -770,7 +770,7 @@ features/follow-user → shared/ui           // ✅ 가능
 ```typescript
 // pages/feed/ui/FeedPage.tsx
 import { PostFeedWidget } from '@/widgets/post-feed';
-import { CreatePostFeature } from '@/features/create-post';
+import { CreatePostFeature } from '@features/create-post';
 
 export const FeedPage = () => {
   return (
@@ -816,7 +816,7 @@ export const usePostFeed = () => {
 
 // widgets/post-feed/ui/PostFeed.tsx
 import { PostCard } from '@/entities/post';
-import { LikeButton } from '@/features/like-post';
+import { LikeButton } from '@features/like-post';
 import { usePostFeed } from '../model/usePostFeed';
 
 export const PostFeed = () => {
@@ -1090,10 +1090,10 @@ pages/profile        → pages/feed
 // ✅ 올바른 import
 import { Button } from '@/shared/ui/button';
 import { User } from '@/entities/user';
-import { FollowButton } from '@/features/follow-user';
+import { FollowButton } from '@features/follow-user';
 
 // ❌ 잘못된 import
-import { LikeButton } from '@/features/like-post'; // features 간 참조
+import { LikeButton } from '@features/like-post'; // features 간 참조
 import { Post } from '@/entities/post';            // entities 간 참조
 ```
 
@@ -1235,7 +1235,7 @@ import { Button, Input, Modal } from '@/shared/ui';
       "@/app/*": ["app/*"],
       "@/pages/*": ["pages/*"],
       "@/widgets/*": ["widgets/*"],
-      "@/features/*": ["features/*"],
+      "@features/*": ["features/*"],
       "@/entities/*": ["entities/*"],
       "@/shared/*": ["shared/*"]
     }
@@ -1245,7 +1245,7 @@ import { Button, Input, Modal } from '@/shared/ui';
 // 사용
 import { Button } from '@/shared/ui/button';
 import { User } from '@/entities/user';
-import { FollowButton } from '@/features/follow-user';
+import { FollowButton } from '@features/follow-user';
 ```
 
 ### 6. 타입 정의 위치
@@ -1321,7 +1321,7 @@ export const followUser = (userId: string) =>
 ```typescript
 // ❌ 잘못된 예: features 간 참조
 // features/follow-user/ui/FollowButton.tsx
-import { LikeButton } from '@/features/like-post'; // ❌
+import { LikeButton } from '@features/like-post'; // ❌
 
 export const FollowButton = ({ userId }) => {
   return (
@@ -1334,8 +1334,8 @@ export const FollowButton = ({ userId }) => {
 
 // ✅ 올바른 예: 상위 레이어에서 조합
 // widgets/user-actions/ui/UserActions.tsx
-import { FollowButton } from '@/features/follow-user';
-import { LikeButton } from '@/features/like-post';
+import { FollowButton } from '@features/follow-user';
+import { LikeButton } from '@features/like-post';
 
 export const UserActions = ({ userId }) => {
   return (
@@ -1352,12 +1352,12 @@ export const UserActions = ({ userId }) => {
 ```typescript
 // ❌ 잘못된 예
 // entities/user/ui/UserCard.tsx
-import { FollowButton } from '@/features/follow-user'; // ❌
+import { FollowButton } from '@features/follow-user'; // ❌
 
 // ✅ 올바른 예
 // widgets/user-profile/ui/UserProfile.tsx
 import { UserCard } from '@/entities/user';
-import { FollowButton } from '@/features/follow-user';
+import { FollowButton } from '@features/follow-user';
 ```
 
 ### 3. ❌ 비즈니스 로직이 Shared에 위치
@@ -1385,10 +1385,10 @@ export const validateEmail = (email: string) => {
 
 ```typescript
 // ❌ 잘못된 예
-import { FollowButton } from '@/features/follow-user/ui/FollowButton';
+import { FollowButton } from '@features/follow-user/ui/FollowButton';
 
 // ✅ 올바른 예
-import { FollowButton } from '@/features/follow-user';
+import { FollowButton } from '@features/follow-user';
 ```
 
 ### 5. ❌ Pages에 복잡한 비즈니스 로직
@@ -1420,7 +1420,7 @@ export const ProfilePage = () => {
 };
 
 // widgets/user-profile/ui/UserProfile.tsx
-import { FollowButton } from '@/features/follow-user';
+import { FollowButton } from '@features/follow-user';
 ```
 
 ### 6. ❌ 거대한 Shared 레이어
