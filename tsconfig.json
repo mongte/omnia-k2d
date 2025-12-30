@@ -3,9 +3,7 @@
   "compileOnSave": false,
   "files": [],
   "references": [
-    {
-      "path": "./apps/lookahead"
-    },
+
     {
       "path": "./apps/sourcing-box"
     },

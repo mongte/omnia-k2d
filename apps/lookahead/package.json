@@ -1,8 +1,0 @@
-{
-  "name": "@omnia-k2d/lookahead",
-  "version": "0.0.1",
-  "private": true,
-  "dependencies": {
-    "@omnia-k2d/shadcn-ui": "workspace:*"
-  }
-}
