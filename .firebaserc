@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "omnia-k2d"
+  },
+  "targets": {
+    "omnia-k2d": {
+      "hosting": {
+        "sourcing-box": [
+          "omnia-sourcing-box"
+        ],
+        "my-daily": [
+          "omnia-my-daily"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

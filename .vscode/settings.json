@@ -1,0 +1,5 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "standard.vscode-standard",
+  "nxConsole.generateAiAgentRules": true
+}
