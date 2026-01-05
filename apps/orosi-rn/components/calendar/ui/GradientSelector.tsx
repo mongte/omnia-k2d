@@ -161,14 +161,14 @@ export function GradientSelector({
     // Instead, let's pass a derived value or just use the style in the wrapper.
     
     return (
-      <Animated.View style={[{ width: itemWidth, alignItems: 'center', justifyContent: 'center' }, animatedStyle]}>
+      <Animated.View style={[{ width: itemWidth, alignItems: 'center', justifyContent: 'center' }, animatedStyle]} testID="GradientSelector-ItemContainer">
         {children}
       </Animated.View>
     );
   };
 
   return (
-    <View style={{ height, width: containerWidth }}>
+    <View style={{ height, width: containerWidth }} testID="GradientSelector">
       <GestureDetector gesture={pan}>
         <Animated.FlatList
             ref={flatListRef}

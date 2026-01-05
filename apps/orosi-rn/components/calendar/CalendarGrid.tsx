@@ -1,14 +1,12 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { View, StyleSheet, FlatList, Dimensions, Text, TouchableOpacity, ViewToken, Platform } from 'react-native';
-import { CalendarController } from './types';
+import { useCalendarStore } from './model/useCalendarStore';
 import { CalendarCell } from './CalendarCell';
 import Colors from '@/constants/Colors';
-import { getDaysInMonth, startOfMonth, endOfMonth, getDay, addMonths, isSameDay, isSameMonth } from 'date-fns';
+import { getDaysInMonth, startOfMonth, endOfMonth, getDay, addMonths, isSameDay, isSameMonth, isAfter, isBefore } from 'date-fns';
 import Animated, { useSharedValue } from 'react-native-reanimated';
 
-interface CalendarGridProps {
-  controller: CalendarController;
-}
+
 
 const BASE_YEAR = 2000;
 const TOTAL_MONTHS = 2400; // 200 years
@@ -33,11 +31,24 @@ const VIEWABILITY_CONFIG = {
   minimumViewTime: 100, // Debounce slightly
 };
 
-export function CalendarGrid({ controller, width }: CalendarGridProps & { width: number }) {
+export function CalendarGrid({ width }: { width: number }) {
   const flatListRef = useRef<FlatList>(null);
   const [layoutReady, setLayoutReady] = useState(false);
   const isProgrammaticScroll = useRef(false);
   const programmaticScrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const focusedDay = useCalendarStore(state => state.focusedDay);
+  const setFocusedDay = useCalendarStore(state => state.setFocusedDay);
+  const lastUpdateSource = useCalendarStore(state => state.lastUpdateSource);
+  const isYearScrolling = useCalendarStore(state => state.isYearScrolling);
+  const toggleDaySelection = useCalendarStore(state => state.toggleDaySelection);
+  const selectedRange = useCalendarStore(state => state.selectedRange);
+
+  // Keep focusedDay in a ref for onViewableItemsChanged to avoid stale closures
+  const focusedDayRef = useRef(focusedDay);
+  useEffect(() => {
+    focusedDayRef.current = focusedDay;
+  }, [focusedDay]);
 
   const CELL_WIDTH = width / 7;
   const CELL_HEIGHT = CELL_WIDTH * 1.3;
@@ -86,22 +97,15 @@ export function CalendarGrid({ controller, width }: CalendarGridProps & { width:
     if (!layoutReady) return;
     
     // Only scroll if the update came from OUTSIDE (header/user), not from the grid itself.
-    if (controller.lastUpdateSource === 'grid') return;
-    if (controller.isYearScrolling) return; // Wait for year scroll to finish? Or maybe we want to sync year scroll?
-    // User requested "1. Optimize Year scroll... minimize rendering... render when year selected".
-    // So we should NOT scroll grid while year is scrolling.
+    if (lastUpdateSource === 'grid') return;
+    if (isYearScrolling) return; 
     
     // Calculate index of focused day
-    const focused = controller.focusedDay;
-    const diffYears = focused.getFullYear() - BASE_YEAR;
-    const diffMonths = (diffYears * 12) + focused.getMonth();
+    const diffYears = focusedDay.getFullYear() - BASE_YEAR;
+    const diffMonths = (diffYears * 12) + focusedDay.getMonth();
     
     const index = Math.max(0, Math.min(diffMonths, TOTAL_MONTHS - 1));
     const config = monthConfigs[index];
-    
-    // We scroll to the month
-    // But we should check if it's already visible?
-    // Flutter logic: "Only scroll if focused day changed (Year/Month nav)"
     
     // Flag start of programmatic scroll
     isProgrammaticScroll.current = true;
@@ -117,7 +121,7 @@ export function CalendarGrid({ controller, width }: CalendarGridProps & { width:
        animated: true
     });
     
-  }, [controller.focusedDay, layoutReady]);
+  }, [focusedDay, layoutReady, lastUpdateSource, isYearScrolling]); // Ensure all deps are listed
 
   // Viewability Config to update controller on scroll
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -131,10 +135,9 @@ export function CalendarGrid({ controller, width }: CalendarGridProps & { width:
            const config = monthConfigs[index];
            if (config) {
                // Update focused day if month changed significantly
-               if (!controller.isYearScrolling && !isSameMonth(config.date, controller.focusedDay)) {
-                   // Ensure we preserve the day of month if possible, but usually just 1st is fine for header sync.
-                   // Actually, if we just scroll, let's just set to 1st of month to update header.
-                   controller.setFocusedDay(config.date, 'grid');
+               // Use Ref to access current focusedDay
+               if (!isSameMonth(config.date, focusedDayRef.current)) {
+                   setFocusedDay(config.date, 'grid');
                }
            }
         }
@@ -144,7 +147,7 @@ export function CalendarGrid({ controller, width }: CalendarGridProps & { width:
   // Render Month Item
   const renderItem = ({ item }: { item: MonthConfig }) => {
     return (
-      <View style={{ height: item.height, width: width, flexDirection: 'row', flexWrap: 'wrap', overflow: 'hidden' }}>
+      <View style={{ height: item.height, width: width, flexDirection: 'row', flexWrap: 'wrap', overflow: 'hidden' }} testID="CalendarGrid-MonthItem">
         {/* We Render Grid of Cells */}
         {/* Empty Cells */}
         {Array.from({ length: item.startOffset }).map((_, i) => (
@@ -173,18 +176,30 @@ export function CalendarGrid({ controller, width }: CalendarGridProps & { width:
            if (dayNum === 12) continuingIds.add('1');
            if (dayNum === 13) continuingIds.add('1');
 
+             // Check selection locally
+             let isSelected = false;
+             let isStart = false;
+             let isEnd = false;
+             
+             if (selectedRange) {
+                 const { start, end } = selectedRange;
+                 isStart = isSameDay(date, start);
+                 isEnd = isSameDay(date, end);
+                 isSelected = (isAfter(date, start) || isStart) && (isBefore(date, end) || isEnd);
+             }
+
            return (
              <CalendarCell 
                key={`day-${dayNum}`} 
                day={dayNum} 
                date={date}
                isToday={isSameDay(date, new Date())}
-               isSelected={controller.isDaySelected(date)}
-               isRangeStart={controller.isRangeStart(date)}
-               isRangeEnd={controller.isRangeEnd(date)}
+               isSelected={isSelected}
+               isRangeStart={isStart}
+               isRangeEnd={isEnd}
                events={events}
                continuingEventIds={continuingIds}
-               onPress={() => controller.toggleDaySelection(date)} 
+               onPress={() => toggleDaySelection(date)} 
                cellWidth={CELL_WIDTH}
              />
            );
@@ -214,11 +229,11 @@ export function CalendarGrid({ controller, width }: CalendarGridProps & { width:
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} testID="CalendarGrid">
       {/* Weekday Header */}
-      <View style={styles.weekdayHeader}>
+      <View style={styles.weekdayHeader} testID="CalendarGrid-WeekHeader">
         {WEEKDAYS.map(day => (
-          <View key={day} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <View key={day} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} testID={`CalendarGrid-WeekdayItem-${day}`}>
              <Text style={styles.weekdayText}>{day}</Text>
           </View>
         ))}

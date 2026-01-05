@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Dimensions } from 'react-native';
-import { CalendarEvent } from './types';
+import { CalendarEvent } from './model/calendarTypes';
 import Colors from '@/constants/Colors';
 import { isSameDay } from 'date-fns';
 
@@ -36,12 +36,13 @@ export function CalendarCell({
   if (day === null) {
       // Empty cell
       return (
-          <View style={[styles.cell, { width: cellWidth, height: cellWidth * 1.3, borderColor: theme.grid, borderRightWidth: 1, borderBottomWidth: 1, backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(128,128,128,0.05)' }]} />
+          <View style={[styles.cell, { width: cellWidth, height: cellWidth * 1.3, borderColor: theme.grid, borderRightWidth: 1, borderBottomWidth: 1, backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(128,128,128,0.05)' }]} testID="CalendarCell-Empty" />
       );
   }
 
   return (
     <TouchableOpacity
+      testID={`CalendarCell-${day ? day : 'empty'}`}
       activeOpacity={0.7}
       onPress={onPress}
       onLongPress={onLongPress}
@@ -57,23 +58,24 @@ export function CalendarCell({
         }
       ]}
     >
-      <View style={{ flex: 1, padding: 8 }}>
+      <View style={{ flex: 1, padding: 8 }} testID="CalendarCell-Content">
           {/* Day Number */}
           {isToday ? (
-             <View style={styles.todayCircle}>
+             <View style={styles.todayCircle} testID="CalendarCell-TodayCircle">
                <Text style={styles.todayText}>{day}</Text>
              </View>
           ) : (
              <Text style={[styles.dayText, { color: theme.text, opacity: 0.7 }]}>{day}</Text>
           )}
 
-          <View style={{ flex: 1 }} />
+          <View style={{ flex: 1 }} testID="CalendarCell-Space" />
           
           {/* Event Dots */}
-          <View style={styles.dotsRow}>
+          <View style={styles.dotsRow} testID="CalendarCell-DotsRow">
              {events.slice(0, 4).map((event, index) => (
                 <View 
                   key={index}
+                  testID={`CalendarCell-Dot-${index}`}
                   style={[styles.dot, { backgroundColor: event.color }]}
                 />
              ))}
@@ -82,8 +84,8 @@ export function CalendarCell({
       
       {/* Connector Ring */}
       {continuingEventIds.size > 0 && (
-         <View style={[styles.connectorRingContainer]}>
-            <View style={[styles.connectorRing, { borderColor: events.find(e => continuingEventIds.has(e.id))?.color, backgroundColor: theme.background }]} />
+         <View style={[styles.connectorRingContainer]} testID="CalendarCell-ConnectorContainer">
+            <View style={[styles.connectorRing, { borderColor: events.find(e => continuingEventIds.has(e.id))?.color, backgroundColor: theme.background }]} testID="CalendarCell-ConnectorRing" />
          </View>
       )}
       
@@ -96,11 +98,11 @@ export function CalendarCell({
           We can render a background color if selected.
       */}
       {isSelected && (
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.AppColors.primary, opacity: 0.1 }]} pointerEvents="none" />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.AppColors.primary, opacity: 0.1 }]} pointerEvents="none" testID="CalendarCell-SelectionOverlay" />
       )}
        {/* Range Borders - Simplified for MVP, Flutter one drew lines manually */}
       {isSelected && (
-          <View style={[StyleSheet.absoluteFill, { borderWidth: 2, borderColor: Colors.AppColors.primary }]} pointerEvents="none" />
+          <View style={[StyleSheet.absoluteFill, { borderWidth: 2, borderColor: Colors.AppColors.primary }]} pointerEvents="none" testID="CalendarCell-BorderOverlay" />
       )}
 
     </TouchableOpacity>

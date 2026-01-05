@@ -1,14 +1,13 @@
 import React, { useRef } from 'react';
 import { StyleSheet, View, DrawerLayoutAndroid, Platform, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCalendarController } from '@/components/calendar/hooks/useCalendarController';
+
 import { CalendarHeader } from '@/components/calendar/CalendarHeader';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
 export default function TabOneScreen() {
-  const controller = useCalendarController();
   const colorScheme = useColorScheme();
   
   // Drawer logic usually handled by Expo Router's Drawer or simple state.
@@ -18,24 +17,19 @@ export default function TabOneScreen() {
   
   const [containerWidth, setContainerWidth] = React.useState(0);
   return (
-    <View style={[styles.container, { backgroundColor: Colors[colorScheme ?? 'light'].background }]}>
+    <View style={[styles.container, { backgroundColor: Colors[colorScheme ?? 'light'].background }]} testID='app'>
       <SafeAreaView style={{ flex: 1, alignItems: 'center' }}>
          <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
-         
-         <View 
+          <View 
             style={[styles.contentContainer]} 
-            onLayout={(e) => {
-              console.log('Container width:', e.nativeEvent.layout.width);
-              setContainerWidth(e.nativeEvent.layout.width);
-            }}
-         >
-             <CalendarHeader 
-                controller={controller} 
-                onOpenDrawer={() => {}}
-                width={containerWidth > 0 ? containerWidth : undefined}
-             />
-             
-             {containerWidth > 0 && <CalendarGrid controller={controller} width={containerWidth} />}
+            onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+            testID='app-content-container'
+          >
+            <CalendarHeader 
+              onOpenDrawer={() => {}}
+              width={containerWidth > 0 ? containerWidth : undefined}
+            />
+            {containerWidth > 0 && <CalendarGrid width={containerWidth} />}
          </View>
       </SafeAreaView>
     </View>
