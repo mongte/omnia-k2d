@@ -4,7 +4,8 @@ import { useCalendarStore } from './model/useCalendarStore';
 import { CalendarCell } from './CalendarCell';
 import Colors from '@/constants/Colors';
 import { getDaysInMonth, startOfMonth, endOfMonth, getDay, addMonths, isSameDay, isSameMonth, isAfter, isBefore } from 'date-fns';
-import Animated, { useSharedValue } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedScrollHandler, runOnJS } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 
 
@@ -43,6 +44,99 @@ export function CalendarGrid({ width }: { width: number }) {
   const isYearScrolling = useCalendarStore(state => state.isYearScrolling);
   const toggleDaySelection = useCalendarStore(state => state.toggleDaySelection);
   const selectedRange = useCalendarStore(state => state.selectedRange);
+  const setSelectedRange = useCalendarStore(state => state.setSelectedRange);
+
+  // Gesture State
+  const scrollY = useSharedValue(0);
+  const isDragging = useRef(false);
+  const dragStartDate = useRef<Date | null>(null);
+
+  const scrollHandler = useAnimatedScrollHandler({
+      onScroll: (event) => {
+          scrollY.value = event.contentOffset.y;
+      },
+  });
+
+  // Calculate Date from Point logic
+  const getDateAtPoint = (x: number, y: number): Date | null => {
+      // Global Y accounting for scroll
+      const absoluteY = y + scrollY.value;
+      
+      // 1. Find the month
+      // Binary search could be faster but linear is fine for < 2400 items in memory (configs are light)
+      // Actually we have configs.
+      const config = monthConfigs.find(c => absoluteY >= c.offset && absoluteY < c.offset + c.height);
+      if (!config) return null;
+
+      // 2. Find row/col in month
+      const localY = absoluteY - config.offset;
+      const row = Math.floor(localY / CELL_HEIGHT);
+      const col = Math.floor(x / CELL_WIDTH);
+
+      // 3. Calc day
+      const dayIndex = row * 7 + col - config.startOffset;
+      const dayNum = dayIndex + 1;
+
+      if (dayNum >= 1 && dayNum <= config.daysInMonth) {
+          return new Date(config.date.getFullYear(), config.date.getMonth(), dayNum);
+      }
+      return null;
+  };
+
+  const handleDragUpdate = (x: number, y: number, state: 'start' | 'active' | 'end') => {
+      // 1. Unconditional Cleanup on End/Finalize
+      if (state === 'end') {
+          isDragging.current = false;
+          dragStartDate.current = null;
+          return;
+      }
+
+      const date = getDateAtPoint(x, y);
+      
+      if (!date) return;
+
+      if (state === 'start') {
+          isDragging.current = true;
+          dragStartDate.current = date;
+          // Initial vibration
+          setSelectedRange({ start: date, end: date });
+      } else if (state === 'active' && isDragging.current && dragStartDate.current) {
+         const start = isBefore(dragStartDate.current, date) ? dragStartDate.current : date;
+         const end = isBefore(dragStartDate.current, date) ? date : dragStartDate.current;
+         setSelectedRange({ start, end });
+      }
+  };
+
+  const handleTap = (x: number, y: number) => {
+      const date = getDateAtPoint(x, y);
+      if (date) {
+        toggleDaySelection(date);
+      }
+  };
+
+  const panGesture = Gesture.Pan()
+      .activateAfterLongPress(200) // Reduced delay
+      .minDistance(10) // Threshold to differentiate from tap slack
+      .onStart((e) => {
+          runOnJS(handleDragUpdate)(e.x, e.y, 'start');
+      })
+      .onUpdate((e) => {
+          runOnJS(handleDragUpdate)(e.x, e.y, 'active');
+      })
+      .onEnd((e) => {
+          runOnJS(handleDragUpdate)(e.x, e.y, 'end');
+      })
+      .onFinalize(() => {
+          runOnJS(handleDragUpdate)(0, 0, 'end');
+      });
+
+  const tapGesture = Gesture.Tap()
+      .maxDuration(250)
+      .onEnd((e) => {
+          runOnJS(handleTap)(e.x, e.y);
+      });
+
+  const gestures = Gesture.Race(panGesture, tapGesture);
 
   // Keep focusedDay in a ref for onViewableItemsChanged to avoid stale closures
   const focusedDayRef = useRef(focusedDay);
@@ -158,15 +252,27 @@ export function CalendarGrid({ width }: { width: number }) {
         {Array.from({ length: item.daysInMonth }).map((_, i) => {
            const dayNum = i + 1;
            const date = new Date(item.date.getFullYear(), item.date.getMonth(), dayNum);
+           const year = date.getFullYear();
+           const month = date.getMonth();
            
            // Mock Events (Hardcoded for demo parity with Flutter)
            const events = [];
-           if (dayNum === 12) {
+           if (year === 2026 && month === 0 && dayNum === 12) {
+               events.push({ id: 'm1', title: '1', startTime: date, endTime: date, color: '#FF5733' });
+               events.push({ id: 'm2', title: '2', startTime: date, endTime: date, color: '#33FF57' });
+               events.push({ id: 'm3', title: '3', startTime: date, endTime: date, color: '#3357FF' });
+               events.push({ id: 'm4', title: '4', startTime: date, endTime: date, color: '#F333FF' });
+               events.push({ id: 'm5', title: '5', startTime: date, endTime: date, color: '#FF33A8' });
+               events.push({ id: 'm6', title: '6', startTime: date, endTime: date, color: '#33FFF5' });
+           }
+
+           if (dayNum === 12 && year === 2000) { // Keep old mock for legacy year if needed, or just replace.
+              // Logic for old mock data (kept for safety if user visits 2000)
               events.push({ id: '1', title: 'Start', startTime: date, endTime: date, color: Colors.AppColors.eventOrange });
               events.push({ id: '2', title: '', startTime: date, endTime: date, color: 'green' });
            }
-           if (dayNum === 13) events.push({ id: '1', title: 'Mid', startTime: date, endTime: date, color: Colors.AppColors.eventOrange });
-           if (dayNum === 14) {
+           if (dayNum === 13 && year === 2000) events.push({ id: '1', title: 'Mid', startTime: date, endTime: date, color: Colors.AppColors.eventOrange });
+           if (dayNum === 14 && year === 2000) {
               events.push({ id: '1', title: 'End', startTime: date, endTime: date, color: Colors.AppColors.eventOrange });
               events.push({ id: '6', title: '', startTime: date, endTime: date, color: 'grey' });
            }
@@ -199,7 +305,6 @@ export function CalendarGrid({ width }: { width: number }) {
                isRangeEnd={isEnd}
                events={events}
                continuingEventIds={continuingIds}
-               onPress={() => toggleDaySelection(date)} 
                cellWidth={CELL_WIDTH}
              />
            );
@@ -240,34 +345,38 @@ export function CalendarGrid({ width }: { width: number }) {
       </View>
       
       {/* Grid */}
-      <FlatList
-        ref={flatListRef}
-        data={monthConfigs}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.date.toISOString()}
-        getItemLayout={(data, index) => ({
-           length: monthConfigs[index].height,
-           offset: monthConfigs[index].offset,
-           index,
-        })}
-        onLayout={() => setLayoutReady(true)}
-        initialNumToRender={2}
-        windowSize={3}
-        maxToRenderPerBatch={2}
-        removeClippedSubviews={true}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={VIEWABILITY_CONFIG}
-        onScrollBeginDrag={() => {
-             // User started interacting, cancel programmatic lock immediately
-             isProgrammaticScroll.current = false;
-             if (programmaticScrollTimeout.current) clearTimeout(programmaticScrollTimeout.current);
-        }}
-        onMomentumScrollEnd={() => {
-             // Scroll finished
-             isProgrammaticScroll.current = false;
-             if (programmaticScrollTimeout.current) clearTimeout(programmaticScrollTimeout.current);
-        }}
-      />
+      <GestureDetector gesture={gestures}>
+        <Animated.FlatList
+            ref={flatListRef}
+            data={monthConfigs}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.date.toISOString()}
+            getItemLayout={(data, index) => ({
+                length: monthConfigs[index].height,
+                offset: monthConfigs[index].offset,
+                index,
+            })}
+            onLayout={() => setLayoutReady(true)}
+            initialNumToRender={2}
+            windowSize={3}
+            maxToRenderPerBatch={2}
+            removeClippedSubviews={true}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={VIEWABILITY_CONFIG}
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
+            onScrollBeginDrag={() => {
+                // User started interacting, cancel programmatic lock immediately
+                isProgrammaticScroll.current = false;
+                if (programmaticScrollTimeout.current) clearTimeout(programmaticScrollTimeout.current);
+            }}
+            onMomentumScrollEnd={() => {
+                // Scroll finished
+                isProgrammaticScroll.current = false;
+                if (programmaticScrollTimeout.current) clearTimeout(programmaticScrollTimeout.current);
+            }}
+        />
+      </GestureDetector>
     </View>
   );
 }

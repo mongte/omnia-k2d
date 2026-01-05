@@ -17,7 +17,9 @@ interface CalendarState {
   clearSelection: () => void;
   startSelection: (date: Date) => void;
   updateSelection: (date: Date) => void;
+
   endSelection: () => void;
+  setSelectedRange: (range: DateRange) => void;
   
   // Selectors (Helpers as functions if needed, or derived state)
   // Zustand specific: we can keep these as logic in components or helper functions here.
@@ -73,6 +75,7 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
   },
 
   endSelection: () => set({ dragStarted: false }),
+  setSelectedRange: (range) => set({ selectedRange: range }),
 }));
 
 // Helper Selectors

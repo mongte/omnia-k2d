@@ -13,7 +13,6 @@ interface CalendarCellProps {
   isRangeEnd?: boolean;
   events?: CalendarEvent[];
   continuingEventIds?: Set<string>;
-  onPress?: () => void;
   onLongPress?: () => void;
   cellWidth: number;
 }
@@ -26,7 +25,6 @@ export function CalendarCell({
   isRangeEnd,
   events = [],
   continuingEventIds = new Set(),
-  onPress,
   onLongPress,
   cellWidth,
 }: CalendarCellProps) {
@@ -41,11 +39,8 @@ export function CalendarCell({
   }
 
   return (
-    <TouchableOpacity
+    <View
       testID={`CalendarCell-${day ? day : 'empty'}`}
-      activeOpacity={0.7}
-      onPress={onPress}
-      onLongPress={onLongPress}
       style={[
         styles.cell,
         {
@@ -70,9 +65,9 @@ export function CalendarCell({
 
           <View style={{ flex: 1 }} testID="CalendarCell-Space" />
           
-          {/* Event Dots */}
+          {/* Event Dots / Squares */}
           <View style={styles.dotsRow} testID="CalendarCell-DotsRow">
-             {events.slice(0, 4).map((event, index) => (
+             {events.slice(0, 10).map((event, index) => ( // Increased limit to show stacking
                 <View 
                   key={index}
                   testID={`CalendarCell-Dot-${index}`}
@@ -82,12 +77,7 @@ export function CalendarCell({
           </View>
       </View>
       
-      {/* Connector Ring */}
-      {continuingEventIds.size > 0 && (
-         <View style={[styles.connectorRingContainer]} testID="CalendarCell-ConnectorContainer">
-            <View style={[styles.connectorRing, { borderColor: events.find(e => continuingEventIds.has(e.id))?.color, backgroundColor: theme.background }]} testID="CalendarCell-ConnectorRing" />
-         </View>
-      )}
+
       
       {/* Selection Overlay (if drawn on top or integrated?)
           In Flutter it was a CustomPainter. In RN, we can use absolute overlay.
@@ -105,7 +95,7 @@ export function CalendarCell({
           <View style={[StyleSheet.absoluteFill, { borderWidth: 2, borderColor: Colors.AppColors.primary }]} pointerEvents="none" testID="CalendarCell-BorderOverlay" />
       )}
 
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -130,25 +120,21 @@ const styles = StyleSheet.create({
   },
   dotsRow: {
       flexDirection: 'row',
-      marginBottom: 2,
-      marginHorizontal: 0,
+      flexWrap: 'wrap-reverse', // Wraps from bottom-left up
+      alignContent: 'flex-start', // Lines pack to the start (bottom in wrap-reverse context)
+      width: '100%',
+      // Ensure specific height or just fill? 
+      // Flex 1 in parent helps.
+      marginTop: 2, 
   },
   dot: {
-      width: 12,
-      height: 12,
-      borderRadius: 3,
+      width: 8,
+      height: 8,
+      borderRadius: 1, // Square with slight radius
       marginRight: 2,
+      marginTop: 2, // Space between rows (visually above because of wrap-reverse?)
+      // Actually with wrap-reverse, 'marginTop' adds space *above* the item in the line.
+      // Lines stack bottom-to-top.
   },
-  connectorRingContainer: {
-      position: 'absolute',
-      right: -5,
-      top: 18,
-      zIndex: 10,
-  },
-  connectorRing: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      borderWidth: 2,
-  }
+
 });
