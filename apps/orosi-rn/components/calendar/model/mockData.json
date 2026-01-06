@@ -1,0 +1,961 @@
+{
+  "events": {
+    "2026-0-2": [
+      {
+        "id": "yxrycdw70",
+        "title": "Event 2-1",
+        "startTime": "2026-01-01T15:00:00.000Z",
+        "endTime": "2026-01-03T15:00:00.000Z",
+        "color": "#BDBDBD"
+      },
+      {
+        "id": "s02barzwz",
+        "title": "Event 2-2",
+        "startTime": "2026-01-01T15:00:00.000Z",
+        "endTime": "2026-01-02T15:00:00.000Z",
+        "color": "#FF9100"
+      },
+      {
+        "id": "9uq2l35l4",
+        "title": "Event 2-3",
+        "startTime": "2026-01-01T15:00:00.000Z",
+        "endTime": "2026-01-03T15:00:00.000Z",
+        "color": "#FF1744"
+      }
+    ],
+    "2026-0-3": [
+      {
+        "id": "yxrycdw70",
+        "title": "Event 2-1",
+        "startTime": "2026-01-01T15:00:00.000Z",
+        "endTime": "2026-01-03T15:00:00.000Z",
+        "color": "#BDBDBD"
+      },
+      {
+        "id": "s02barzwz",
+        "title": "Event 2-2",
+        "startTime": "2026-01-01T15:00:00.000Z",
+        "endTime": "2026-01-02T15:00:00.000Z",
+        "color": "#FF9100"
+      },
+      {
+        "id": "9uq2l35l4",
+        "title": "Event 2-3",
+        "startTime": "2026-01-01T15:00:00.000Z",
+        "endTime": "2026-01-03T15:00:00.000Z",
+        "color": "#FF1744"
+      }
+    ],
+    "2026-0-4": [
+      {
+        "id": "yxrycdw70",
+        "title": "Event 2-1",
+        "startTime": "2026-01-01T15:00:00.000Z",
+        "endTime": "2026-01-03T15:00:00.000Z",
+        "color": "#BDBDBD"
+      },
+      {
+        "id": "9uq2l35l4",
+        "title": "Event 2-3",
+        "startTime": "2026-01-01T15:00:00.000Z",
+        "endTime": "2026-01-03T15:00:00.000Z",
+        "color": "#FF1744"
+      },
+      {
+        "id": "3eehepejd",
+        "title": "Event 4-1",
+        "startTime": "2026-01-03T15:00:00.000Z",
+        "endTime": "2026-01-06T15:00:00.000Z",
+        "color": "#D500F9"
+      }
+    ],
+    "2026-0-5": [
+      {
+        "id": "3eehepejd",
+        "title": "Event 4-1",
+        "startTime": "2026-01-03T15:00:00.000Z",
+        "endTime": "2026-01-06T15:00:00.000Z",
+        "color": "#D500F9"
+      }
+    ],
+    "2026-0-6": [
+      {
+        "id": "3eehepejd",
+        "title": "Event 4-1",
+        "startTime": "2026-01-03T15:00:00.000Z",
+        "endTime": "2026-01-06T15:00:00.000Z",
+        "color": "#D500F9"
+      }
+    ],
+    "2026-0-7": [
+      {
+        "id": "3eehepejd",
+        "title": "Event 4-1",
+        "startTime": "2026-01-03T15:00:00.000Z",
+        "endTime": "2026-01-06T15:00:00.000Z",
+        "color": "#D500F9"
+      },
+      {
+        "id": "61a905azd",
+        "title": "Event 7-1",
+        "startTime": "2026-01-06T15:00:00.000Z",
+        "endTime": "2026-01-10T15:00:00.000Z",
+        "color": "#2E7D32"
+      },
+      {
+        "id": "wiahz82kd",
+        "title": "Event 7-2",
+        "startTime": "2026-01-06T15:00:00.000Z",
+        "endTime": "2026-01-08T15:00:00.000Z",
+        "color": "#2E7D32"
+      }
+    ],
+    "2026-0-8": [
+      {
+        "id": "61a905azd",
+        "title": "Event 7-1",
+        "startTime": "2026-01-06T15:00:00.000Z",
+        "endTime": "2026-01-10T15:00:00.000Z",
+        "color": "#2E7D32"
+      },
+      {
+        "id": "wiahz82kd",
+        "title": "Event 7-2",
+        "startTime": "2026-01-06T15:00:00.000Z",
+        "endTime": "2026-01-08T15:00:00.000Z",
+        "color": "#2E7D32"
+      },
+      {
+        "id": "52iargnqg",
+        "title": "Event 8-1",
+        "startTime": "2026-01-07T15:00:00.000Z",
+        "endTime": "2026-01-07T15:00:00.000Z",
+        "color": "#FF1744"
+      },
+      {
+        "id": "1k7sl1jn2",
+        "title": "Event 8-2",
+        "startTime": "2026-01-07T15:00:00.000Z",
+        "endTime": "2026-01-09T15:00:00.000Z",
+        "color": "#2979FF"
+      }
+    ],
+    "2026-0-9": [
+      {
+        "id": "61a905azd",
+        "title": "Event 7-1",
+        "startTime": "2026-01-06T15:00:00.000Z",
+        "endTime": "2026-01-10T15:00:00.000Z",
+        "color": "#2E7D32"
+      },
+      {
+        "id": "wiahz82kd",
+        "title": "Event 7-2",
+        "startTime": "2026-01-06T15:00:00.000Z",
+        "endTime": "2026-01-08T15:00:00.000Z",
+        "color": "#2E7D32"
+      },
+      {
+        "id": "1k7sl1jn2",
+        "title": "Event 8-2",
+        "startTime": "2026-01-07T15:00:00.000Z",
+        "endTime": "2026-01-09T15:00:00.000Z",
+        "color": "#2979FF"
+      }
+    ],
+    "2026-0-10": [
+      {
+        "id": "61a905azd",
+        "title": "Event 7-1",
+        "startTime": "2026-01-06T15:00:00.000Z",
+        "endTime": "2026-01-10T15:00:00.000Z",
+        "color": "#2E7D32"
+      },
+      {
+        "id": "1k7sl1jn2",
+        "title": "Event 8-2",
+        "startTime": "2026-01-07T15:00:00.000Z",
+        "endTime": "2026-01-09T15:00:00.000Z",
+        "color": "#2979FF"
+      }
+    ],
+    "2026-0-11": [
+      {
+        "id": "61a905azd",
+        "title": "Event 7-1",
+        "startTime": "2026-01-06T15:00:00.000Z",
+        "endTime": "2026-01-10T15:00:00.000Z",
+        "color": "#2E7D32"
+      },
+      {
+        "id": "fge2c74ef",
+        "title": "Event 11-1",
+        "startTime": "2026-01-10T15:00:00.000Z",
+        "endTime": "2026-01-10T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-0-12": [
+      {
+        "id": "kq8qvdaw1",
+        "title": "Event 12-1",
+        "startTime": "2026-01-11T15:00:00.000Z",
+        "endTime": "2026-01-11T15:00:00.000Z",
+        "color": "#FFEA00"
+      }
+    ],
+    "2026-0-18": [
+      {
+        "id": "f1so3veox",
+        "title": "Event 18-1",
+        "startTime": "2026-01-17T15:00:00.000Z",
+        "endTime": "2026-01-19T15:00:00.000Z",
+        "color": "#FF1744"
+      }
+    ],
+    "2026-0-19": [
+      {
+        "id": "f1so3veox",
+        "title": "Event 18-1",
+        "startTime": "2026-01-17T15:00:00.000Z",
+        "endTime": "2026-01-19T15:00:00.000Z",
+        "color": "#FF1744"
+      },
+      {
+        "id": "qw5l7p0v1",
+        "title": "Event 19-1",
+        "startTime": "2026-01-18T15:00:00.000Z",
+        "endTime": "2026-01-22T15:00:00.000Z",
+        "color": "#BDBDBD"
+      },
+      {
+        "id": "bn0x7ymey",
+        "title": "Event 19-2",
+        "startTime": "2026-01-18T15:00:00.000Z",
+        "endTime": "2026-01-18T15:00:00.000Z",
+        "color": "#BDBDBD"
+      }
+    ],
+    "2026-0-20": [
+      {
+        "id": "f1so3veox",
+        "title": "Event 18-1",
+        "startTime": "2026-01-17T15:00:00.000Z",
+        "endTime": "2026-01-19T15:00:00.000Z",
+        "color": "#FF1744"
+      },
+      {
+        "id": "qw5l7p0v1",
+        "title": "Event 19-1",
+        "startTime": "2026-01-18T15:00:00.000Z",
+        "endTime": "2026-01-22T15:00:00.000Z",
+        "color": "#BDBDBD"
+      }
+    ],
+    "2026-0-21": [
+      {
+        "id": "qw5l7p0v1",
+        "title": "Event 19-1",
+        "startTime": "2026-01-18T15:00:00.000Z",
+        "endTime": "2026-01-22T15:00:00.000Z",
+        "color": "#BDBDBD"
+      }
+    ],
+    "2026-0-22": [
+      {
+        "id": "qw5l7p0v1",
+        "title": "Event 19-1",
+        "startTime": "2026-01-18T15:00:00.000Z",
+        "endTime": "2026-01-22T15:00:00.000Z",
+        "color": "#BDBDBD"
+      }
+    ],
+    "2026-0-23": [
+      {
+        "id": "qw5l7p0v1",
+        "title": "Event 19-1",
+        "startTime": "2026-01-18T15:00:00.000Z",
+        "endTime": "2026-01-22T15:00:00.000Z",
+        "color": "#BDBDBD"
+      }
+    ],
+    "2026-0-25": [
+      {
+        "id": "upafq4rtx",
+        "title": "Event 25-1",
+        "startTime": "2026-01-24T15:00:00.000Z",
+        "endTime": "2026-01-28T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "j2tsgcom4",
+        "title": "Event 25-2",
+        "startTime": "2026-01-24T15:00:00.000Z",
+        "endTime": "2026-01-25T15:00:00.000Z",
+        "color": "#2979FF"
+      }
+    ],
+    "2026-0-26": [
+      {
+        "id": "upafq4rtx",
+        "title": "Event 25-1",
+        "startTime": "2026-01-24T15:00:00.000Z",
+        "endTime": "2026-01-28T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "j2tsgcom4",
+        "title": "Event 25-2",
+        "startTime": "2026-01-24T15:00:00.000Z",
+        "endTime": "2026-01-25T15:00:00.000Z",
+        "color": "#2979FF"
+      },
+      {
+        "id": "pgg25ffx3",
+        "title": "Event 26-1",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-27T15:00:00.000Z",
+        "color": "#D500F9"
+      },
+      {
+        "id": "u8tw59fj1",
+        "title": "Event 26-2",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-29T15:00:00.000Z",
+        "color": "#FFEA00"
+      },
+      {
+        "id": "abahwtk0y",
+        "title": "Event 26-3",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-27T15:00:00.000Z",
+        "color": "#FFEA00"
+      }
+    ],
+    "2026-0-27": [
+      {
+        "id": "upafq4rtx",
+        "title": "Event 25-1",
+        "startTime": "2026-01-24T15:00:00.000Z",
+        "endTime": "2026-01-28T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "pgg25ffx3",
+        "title": "Event 26-1",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-27T15:00:00.000Z",
+        "color": "#D500F9"
+      },
+      {
+        "id": "u8tw59fj1",
+        "title": "Event 26-2",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-29T15:00:00.000Z",
+        "color": "#FFEA00"
+      },
+      {
+        "id": "abahwtk0y",
+        "title": "Event 26-3",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-27T15:00:00.000Z",
+        "color": "#FFEA00"
+      },
+      {
+        "id": "4av5wmpi9",
+        "title": "Event 27-1",
+        "startTime": "2026-01-26T15:00:00.000Z",
+        "endTime": "2026-01-26T15:00:00.000Z",
+        "color": "#FF1744"
+      }
+    ],
+    "2026-0-28": [
+      {
+        "id": "upafq4rtx",
+        "title": "Event 25-1",
+        "startTime": "2026-01-24T15:00:00.000Z",
+        "endTime": "2026-01-28T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "pgg25ffx3",
+        "title": "Event 26-1",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-27T15:00:00.000Z",
+        "color": "#D500F9"
+      },
+      {
+        "id": "u8tw59fj1",
+        "title": "Event 26-2",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-29T15:00:00.000Z",
+        "color": "#FFEA00"
+      },
+      {
+        "id": "abahwtk0y",
+        "title": "Event 26-3",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-27T15:00:00.000Z",
+        "color": "#FFEA00"
+      }
+    ],
+    "2026-0-29": [
+      {
+        "id": "upafq4rtx",
+        "title": "Event 25-1",
+        "startTime": "2026-01-24T15:00:00.000Z",
+        "endTime": "2026-01-28T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "u8tw59fj1",
+        "title": "Event 26-2",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-29T15:00:00.000Z",
+        "color": "#FFEA00"
+      },
+      {
+        "id": "bus7yvao1",
+        "title": "Event 29-1",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-01-31T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "jfagcelvj",
+        "title": "Event 29-2",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-02-01T15:00:00.000Z",
+        "color": "#FF1744"
+      }
+    ],
+    "2026-0-30": [
+      {
+        "id": "u8tw59fj1",
+        "title": "Event 26-2",
+        "startTime": "2026-01-25T15:00:00.000Z",
+        "endTime": "2026-01-29T15:00:00.000Z",
+        "color": "#FFEA00"
+      },
+      {
+        "id": "bus7yvao1",
+        "title": "Event 29-1",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-01-31T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "jfagcelvj",
+        "title": "Event 29-2",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-02-01T15:00:00.000Z",
+        "color": "#FF1744"
+      },
+      {
+        "id": "i2o4pi0jt",
+        "title": "Event 30-1",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-01-29T15:00:00.000Z",
+        "color": "#2979FF"
+      },
+      {
+        "id": "uaat203z6",
+        "title": "Event 30-2",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#2979FF"
+      },
+      {
+        "id": "sp0pv3az1",
+        "title": "Event 30-3",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-0-31": [
+      {
+        "id": "bus7yvao1",
+        "title": "Event 29-1",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-01-31T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "jfagcelvj",
+        "title": "Event 29-2",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-02-01T15:00:00.000Z",
+        "color": "#FF1744"
+      },
+      {
+        "id": "uaat203z6",
+        "title": "Event 30-2",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#2979FF"
+      },
+      {
+        "id": "sp0pv3az1",
+        "title": "Event 30-3",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-1-1": [
+      {
+        "id": "bus7yvao1",
+        "title": "Event 29-1",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-01-31T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "jfagcelvj",
+        "title": "Event 29-2",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-02-01T15:00:00.000Z",
+        "color": "#FF1744"
+      },
+      {
+        "id": "uaat203z6",
+        "title": "Event 30-2",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#2979FF"
+      },
+      {
+        "id": "sp0pv3az1",
+        "title": "Event 30-3",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-1-2": [
+      {
+        "id": "jfagcelvj",
+        "title": "Event 29-2",
+        "startTime": "2026-01-28T15:00:00.000Z",
+        "endTime": "2026-02-01T15:00:00.000Z",
+        "color": "#FF1744"
+      },
+      {
+        "id": "uaat203z6",
+        "title": "Event 30-2",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#2979FF"
+      },
+      {
+        "id": "sp0pv3az1",
+        "title": "Event 30-3",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-1-3": [
+      {
+        "id": "uaat203z6",
+        "title": "Event 30-2",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#2979FF"
+      },
+      {
+        "id": "sp0pv3az1",
+        "title": "Event 30-3",
+        "startTime": "2026-01-29T15:00:00.000Z",
+        "endTime": "2026-02-02T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-1-5": [
+      {
+        "id": "d7ed491bt",
+        "title": "Event 5-1",
+        "startTime": "2026-02-04T15:00:00.000Z",
+        "endTime": "2026-02-06T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-1-6": [
+      {
+        "id": "d7ed491bt",
+        "title": "Event 5-1",
+        "startTime": "2026-02-04T15:00:00.000Z",
+        "endTime": "2026-02-06T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-1-7": [
+      {
+        "id": "d7ed491bt",
+        "title": "Event 5-1",
+        "startTime": "2026-02-04T15:00:00.000Z",
+        "endTime": "2026-02-06T15:00:00.000Z",
+        "color": "#E91E63"
+      }
+    ],
+    "2026-1-8": [
+      {
+        "id": "8towgmypw",
+        "title": "Event 8-1",
+        "startTime": "2026-02-07T15:00:00.000Z",
+        "endTime": "2026-02-08T15:00:00.000Z",
+        "color": "#FF9100"
+      },
+      {
+        "id": "8abqz33uo",
+        "title": "Event 8-2",
+        "startTime": "2026-02-07T15:00:00.000Z",
+        "endTime": "2026-02-08T15:00:00.000Z",
+        "color": "#FFEA00"
+      }
+    ],
+    "2026-1-9": [
+      {
+        "id": "8towgmypw",
+        "title": "Event 8-1",
+        "startTime": "2026-02-07T15:00:00.000Z",
+        "endTime": "2026-02-08T15:00:00.000Z",
+        "color": "#FF9100"
+      },
+      {
+        "id": "8abqz33uo",
+        "title": "Event 8-2",
+        "startTime": "2026-02-07T15:00:00.000Z",
+        "endTime": "2026-02-08T15:00:00.000Z",
+        "color": "#FFEA00"
+      },
+      {
+        "id": "e9ppy2zbi",
+        "title": "Event 9-1",
+        "startTime": "2026-02-08T15:00:00.000Z",
+        "endTime": "2026-02-10T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "6zsjtrywf",
+        "title": "Event 9-2",
+        "startTime": "2026-02-08T15:00:00.000Z",
+        "endTime": "2026-02-10T15:00:00.000Z",
+        "color": "#66BB6A"
+      }
+    ],
+    "2026-1-10": [
+      {
+        "id": "e9ppy2zbi",
+        "title": "Event 9-1",
+        "startTime": "2026-02-08T15:00:00.000Z",
+        "endTime": "2026-02-10T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "6zsjtrywf",
+        "title": "Event 9-2",
+        "startTime": "2026-02-08T15:00:00.000Z",
+        "endTime": "2026-02-10T15:00:00.000Z",
+        "color": "#66BB6A"
+      }
+    ],
+    "2026-1-11": [
+      {
+        "id": "e9ppy2zbi",
+        "title": "Event 9-1",
+        "startTime": "2026-02-08T15:00:00.000Z",
+        "endTime": "2026-02-10T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "6zsjtrywf",
+        "title": "Event 9-2",
+        "startTime": "2026-02-08T15:00:00.000Z",
+        "endTime": "2026-02-10T15:00:00.000Z",
+        "color": "#66BB6A"
+      }
+    ],
+    "2026-1-19": [
+      {
+        "id": "gnyz129qu",
+        "title": "Event 19-1",
+        "startTime": "2026-02-18T15:00:00.000Z",
+        "endTime": "2026-02-18T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "w4gz13h01",
+        "title": "Event 19-2",
+        "startTime": "2026-02-18T15:00:00.000Z",
+        "endTime": "2026-02-19T15:00:00.000Z",
+        "color": "#66BB6A"
+      },
+      {
+        "id": "zeysl3p62",
+        "title": "Event 19-3",
+        "startTime": "2026-02-18T15:00:00.000Z",
+        "endTime": "2026-02-19T15:00:00.000Z",
+        "color": "#66BB6A"
+      }
+    ],
+    "2026-1-20": [
+      {
+        "id": "w4gz13h01",
+        "title": "Event 19-2",
+        "startTime": "2026-02-18T15:00:00.000Z",
+        "endTime": "2026-02-19T15:00:00.000Z",
+        "color": "#66BB6A"
+      },
+      {
+        "id": "zeysl3p62",
+        "title": "Event 19-3",
+        "startTime": "2026-02-18T15:00:00.000Z",
+        "endTime": "2026-02-19T15:00:00.000Z",
+        "color": "#66BB6A"
+      }
+    ],
+    "2026-1-23": [
+      {
+        "id": "9wtidcrrl",
+        "title": "Event 23-1",
+        "startTime": "2026-02-22T15:00:00.000Z",
+        "endTime": "2026-02-26T15:00:00.000Z",
+        "color": "#66BB6A"
+      }
+    ],
+    "2026-1-24": [
+      {
+        "id": "9wtidcrrl",
+        "title": "Event 23-1",
+        "startTime": "2026-02-22T15:00:00.000Z",
+        "endTime": "2026-02-26T15:00:00.000Z",
+        "color": "#66BB6A"
+      }
+    ],
+    "2026-1-25": [
+      {
+        "id": "9wtidcrrl",
+        "title": "Event 23-1",
+        "startTime": "2026-02-22T15:00:00.000Z",
+        "endTime": "2026-02-26T15:00:00.000Z",
+        "color": "#66BB6A"
+      }
+    ],
+    "2026-1-26": [
+      {
+        "id": "9wtidcrrl",
+        "title": "Event 23-1",
+        "startTime": "2026-02-22T15:00:00.000Z",
+        "endTime": "2026-02-26T15:00:00.000Z",
+        "color": "#66BB6A"
+      },
+      {
+        "id": "9u1z1xwuz",
+        "title": "Event 26-1",
+        "startTime": "2026-02-25T15:00:00.000Z",
+        "endTime": "2026-02-28T15:00:00.000Z",
+        "color": "#66BB6A"
+      },
+      {
+        "id": "c45uq21d9",
+        "title": "Event 26-2",
+        "startTime": "2026-02-25T15:00:00.000Z",
+        "endTime": "2026-02-28T15:00:00.000Z",
+        "color": "#FF9100"
+      }
+    ],
+    "2026-1-27": [
+      {
+        "id": "9wtidcrrl",
+        "title": "Event 23-1",
+        "startTime": "2026-02-22T15:00:00.000Z",
+        "endTime": "2026-02-26T15:00:00.000Z",
+        "color": "#66BB6A"
+      },
+      {
+        "id": "9u1z1xwuz",
+        "title": "Event 26-1",
+        "startTime": "2026-02-25T15:00:00.000Z",
+        "endTime": "2026-02-28T15:00:00.000Z",
+        "color": "#66BB6A"
+      },
+      {
+        "id": "c45uq21d9",
+        "title": "Event 26-2",
+        "startTime": "2026-02-25T15:00:00.000Z",
+        "endTime": "2026-02-28T15:00:00.000Z",
+        "color": "#FF9100"
+      }
+    ],
+    "2026-1-28": [
+      {
+        "id": "9u1z1xwuz",
+        "title": "Event 26-1",
+        "startTime": "2026-02-25T15:00:00.000Z",
+        "endTime": "2026-02-28T15:00:00.000Z",
+        "color": "#66BB6A"
+      },
+      {
+        "id": "c45uq21d9",
+        "title": "Event 26-2",
+        "startTime": "2026-02-25T15:00:00.000Z",
+        "endTime": "2026-02-28T15:00:00.000Z",
+        "color": "#FF9100"
+      },
+      {
+        "id": "kr144s42k",
+        "title": "Event 28-1",
+        "startTime": "2026-02-27T15:00:00.000Z",
+        "endTime": "2026-02-27T15:00:00.000Z",
+        "color": "#E91E63"
+      },
+      {
+        "id": "leblx3lwi",
+        "title": "Event 28-2",
+        "startTime": "2026-02-27T15:00:00.000Z",
+        "endTime": "2026-03-02T15:00:00.000Z",
+        "color": "#2979FF"
+      }
+    ]
+  },
+  "continuing": {
+    "2026-0-3": [
+      "yxrycdw70",
+      "s02barzwz",
+      "9uq2l35l4"
+    ],
+    "2026-0-4": [
+      "yxrycdw70",
+      "9uq2l35l4"
+    ],
+    "2026-0-5": [
+      "3eehepejd"
+    ],
+    "2026-0-6": [
+      "3eehepejd"
+    ],
+    "2026-0-7": [
+      "3eehepejd"
+    ],
+    "2026-0-8": [
+      "61a905azd",
+      "wiahz82kd"
+    ],
+    "2026-0-9": [
+      "61a905azd",
+      "wiahz82kd",
+      "1k7sl1jn2"
+    ],
+    "2026-0-10": [
+      "61a905azd",
+      "1k7sl1jn2"
+    ],
+    "2026-0-11": [
+      "61a905azd"
+    ],
+    "2026-0-19": [
+      "f1so3veox"
+    ],
+    "2026-0-20": [
+      "f1so3veox",
+      "qw5l7p0v1"
+    ],
+    "2026-0-21": [
+      "qw5l7p0v1"
+    ],
+    "2026-0-22": [
+      "qw5l7p0v1"
+    ],
+    "2026-0-23": [
+      "qw5l7p0v1"
+    ],
+    "2026-0-26": [
+      "upafq4rtx",
+      "j2tsgcom4"
+    ],
+    "2026-0-27": [
+      "upafq4rtx",
+      "pgg25ffx3",
+      "u8tw59fj1",
+      "abahwtk0y"
+    ],
+    "2026-0-28": [
+      "upafq4rtx",
+      "pgg25ffx3",
+      "u8tw59fj1",
+      "abahwtk0y"
+    ],
+    "2026-0-29": [
+      "upafq4rtx",
+      "u8tw59fj1"
+    ],
+    "2026-0-30": [
+      "u8tw59fj1",
+      "bus7yvao1",
+      "jfagcelvj"
+    ],
+    "2026-0-31": [
+      "bus7yvao1",
+      "jfagcelvj",
+      "uaat203z6",
+      "sp0pv3az1"
+    ],
+    "2026-1-1": [
+      "bus7yvao1",
+      "jfagcelvj",
+      "uaat203z6",
+      "sp0pv3az1"
+    ],
+    "2026-1-2": [
+      "jfagcelvj",
+      "uaat203z6",
+      "sp0pv3az1"
+    ],
+    "2026-1-3": [
+      "uaat203z6",
+      "sp0pv3az1"
+    ],
+    "2026-1-6": [
+      "d7ed491bt"
+    ],
+    "2026-1-7": [
+      "d7ed491bt"
+    ],
+    "2026-1-9": [
+      "8towgmypw",
+      "8abqz33uo"
+    ],
+    "2026-1-10": [
+      "e9ppy2zbi",
+      "6zsjtrywf"
+    ],
+    "2026-1-11": [
+      "e9ppy2zbi",
+      "6zsjtrywf"
+    ],
+    "2026-1-20": [
+      "w4gz13h01",
+      "zeysl3p62"
+    ],
+    "2026-1-24": [
+      "9wtidcrrl"
+    ],
+    "2026-1-25": [
+      "9wtidcrrl"
+    ],
+    "2026-1-26": [
+      "9wtidcrrl"
+    ],
+    "2026-1-27": [
+      "9wtidcrrl",
+      "9u1z1xwuz",
+      "c45uq21d9"
+    ],
+    "2026-1-28": [
+      "9u1z1xwuz",
+      "c45uq21d9"
+    ]
+  }
+}

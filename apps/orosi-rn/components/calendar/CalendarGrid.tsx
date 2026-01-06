@@ -30,57 +30,37 @@ const VIEWABILITY_CONFIG = {
   minimumViewTime: 100, // Debounce slightly
 };
 
+import mockData from './model/mockData.json';
+
 const EMPTY_EVENTS: any[] = [];
-const STATIC_MOCK_EVENTS: Record<string, any[]> = {};
-
+let STATIC_MOCK_EVENTS: Record<string, any[]> = {};
+let STATIC_CONTINUING_IDS: Record<string, Set<string>> = {};
 const EMPTY_SET = new Set<string>();
-const STATIC_CONTINUING_IDS: Record<string, Set<string>> = {};
 
-// Populate Mock Data Once
 const initMockData = () => {
     if (Object.keys(STATIC_MOCK_EVENTS).length > 0) return;
+    
+    // Parse JSON data (convert string dates back to Date objects if needed, 
+    // though CalendarCell might need Date objects. The JSON has ISO strings).
+    // Let's assume we parse them here to maintain internal consistency.
+    const { events, continuing } = mockData;
 
-    // 2026-01-12
-    const key1 = '2026-0-12';
-    STATIC_MOCK_EVENTS[key1] = [
-        { id: 'm1', title: '1', startTime: new Date(2026, 0, 12), endTime: new Date(2026, 0, 12), color: '#FF5733' },
-        { id: 'm2', title: '2', startTime: new Date(2026, 0, 12), endTime: new Date(2026, 0, 12), color: '#33FF57' },
-        { id: 'm3', title: '3', startTime: new Date(2026, 0, 12), endTime: new Date(2026, 0, 12), color: '#3357FF' },
-        { id: 'm4', title: '4', startTime: new Date(2026, 0, 12), endTime: new Date(2026, 0, 12), color: '#F333FF' },
-        { id: 'm5', title: '5', startTime: new Date(2026, 0, 12), endTime: new Date(2026, 0, 12), color: '#FF33A8' },
-        { id: 'm6', title: '6', startTime: new Date(2026, 0, 12), endTime: new Date(2026, 0, 12), color: '#33FFF5' },
-    ];
+    // Convert events
+    Object.keys(events).forEach(key => {
+        STATIC_MOCK_EVENTS[key] = (events as any)[key].map((e: any) => ({
+            ...e,
+            startTime: new Date(e.startTime),
+            endTime: new Date(e.endTime)
+        }));
+    });
 
-    // 2000-00-12
-    const key2 = '2000-0-12';
-    STATIC_MOCK_EVENTS[key2] = [
-        { id: '1', title: 'Start', startTime: new Date(2000, 0, 12), endTime: new Date(2000, 0, 12), color: Colors.AppColors.eventOrange },
-        { id: '2', title: '', startTime: new Date(2000, 0, 12), endTime: new Date(2000, 0, 12), color: 'green' },
-    ];
-    // Mock continuing ID for 12th
-    const set2 = new Set<string>();
-    set2.add('1');
-    STATIC_CONTINUING_IDS[key2] = set2;
-
-    // 2000-00-13
-    const key3 = '2000-0-13';
-    STATIC_MOCK_EVENTS[key3] = [
-        { id: '1', title: 'Mid', startTime: new Date(2000, 0, 13), endTime: new Date(2000, 0, 13), color: Colors.AppColors.eventOrange },
-    ];
-    // Mock continuing ID for 13th
-    const set3 = new Set<string>();
-    set3.add('1');
-    STATIC_CONTINUING_IDS[key3] = set3;
-
-    // 2000-00-14
-    const key4 = '2000-0-14';
-    STATIC_MOCK_EVENTS[key4] = [
-        { id: '1', title: 'End', startTime: new Date(2000, 0, 14), endTime: new Date(2000, 0, 14), color: Colors.AppColors.eventOrange },
-        { id: '6', title: '', startTime: new Date(2000, 0, 14), endTime: new Date(2000, 0, 14), color: 'grey' },
-    ];
+    // Convert continuing IDs (Array -> Set)
+    Object.keys(continuing).forEach(key => {
+        STATIC_CONTINUING_IDS[key] = new Set((continuing as any)[key]);
+    });
 };
 
-initMockData(); // Run once on load
+initMockData();
 
 export function CalendarGrid({ width }: { width: number }) {
   const flatListRef = useRef<FlatList>(null);
