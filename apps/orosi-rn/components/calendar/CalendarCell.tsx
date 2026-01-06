@@ -17,7 +17,8 @@ interface CalendarCellProps {
   cellWidth: number;
 }
 
-export function CalendarCell({
+// Memoized to prevent re-renders on every scroll/drag update
+export const CalendarCell = React.memo(({
   day,
   isToday,
   isSelected,
@@ -27,7 +28,7 @@ export function CalendarCell({
   continuingEventIds = new Set(),
   onLongPress,
   cellWidth,
-}: CalendarCellProps) {
+}: CalendarCellProps) => {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
   
@@ -97,7 +98,24 @@ export function CalendarCell({
 
     </View>
   );
-}
+}, (prev, next) => {
+  // Custom comparison to handle Date object references being different
+  const isDateEqual = prev.date.getTime() === next.date.getTime();
+  const isEventsEqual = prev.events === next.events;
+  const isIdsEqual = prev.continuingEventIds === next.continuingEventIds;
+  
+  return (
+    prev.day === next.day &&
+    prev.isSelected === next.isSelected &&
+    prev.isToday === next.isToday &&
+    prev.isRangeStart === next.isRangeStart &&
+    prev.isRangeEnd === next.isRangeEnd &&
+    prev.cellWidth === next.cellWidth &&
+    isDateEqual &&
+    isEventsEqual &&
+    isIdsEqual
+  );
+});
 
 const styles = StyleSheet.create({
   cell: {

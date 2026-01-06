@@ -50,6 +50,7 @@ export function GradientSelector({
   const context = useSharedValue(0);
 
   const pan = Gesture.Pan()
+    .enabled(Platform.OS === 'web')
     .onBegin(() => {
       context.value = scrollX.value;
     })

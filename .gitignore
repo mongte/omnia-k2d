@@ -75,3 +75,7 @@ vitest.config.*.timestamp*
 ## Firebase
 .firebase/
 # .firebaserc is deliberately NOT ignored to share project aliases
+
+# Agent Rules
+!.agent/rules/
+

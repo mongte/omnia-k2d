@@ -66,7 +66,7 @@ export function CalendarHeader({ onOpenDrawer, width = 350 }: CalendarHeaderProp
                data={yearData}
                itemWidth={87.5}
                height={44}
-               containerWidth={width}
+               containerWidth={width ? width * 0.6 : undefined}
                initialIndex={initialYearIndex}
                selectedIndex={initialYearIndex}
                onIndexChanged={(index) => {
@@ -98,14 +98,14 @@ export function CalendarHeader({ onOpenDrawer, width = 350 }: CalendarHeaderProp
                }}
             />
             
-            <View style={{ height: 4 }} testID="CalendarHeader-Spacer" />
+            <View style={{ height: 12 }} testID="CalendarHeader-Spacer" />
             
             {/* Month Selector */}
             <GradientSelector 
                data={monthData}
                itemWidth={62.5}
                height={30}
-               containerWidth={width}
+               containerWidth={width ? width * 0.6 : undefined}
                initialIndex={initialMonthIndex}
                selectedIndex={initialMonthIndex}
                onIndexChanged={(index) => {
