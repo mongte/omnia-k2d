@@ -186,13 +186,26 @@ export function CalendarGrid({ width }: { width: number }) {
   };
 
   const setDetailModal = useCalendarStore(state => state.setDetailModal);
+  const isModalOpen = useCalendarStore(state => state.detailModal.isOpen);
 
   const handleTap = (x: number, y: number) => {
       const date = getDateAtPoint(x, y);
       if (date) {
+        // Check if tapping inside an existing selected range
+        if (selectedRange && !isSameDay(selectedRange.start, selectedRange.end)) {
+            const isInside = (isAfter(date, selectedRange.start) || isSameDay(date, selectedRange.start)) &&
+                             (isBefore(date, selectedRange.end) || isSameDay(date, selectedRange.end));
+            
+            if (isInside) {
+                // If tapping inside a multi-day selection, open modal for the whole range
+                setDetailModal(true, null, selectedRange); 
+                return;
+            }
+        }
+
         toggleDaySelection(date);
         
-        // Check for events to open modal
+        // standard single day logic
         const year = date.getFullYear();
         const month = date.getMonth();
         const dayNum = date.getDate();
@@ -206,6 +219,7 @@ export function CalendarGrid({ width }: { width: number }) {
   };
 
   const panGesture = Gesture.Pan()
+      .enabled(!isModalOpen)
       .activateAfterLongPress(300)
       .simultaneousWithExternalGesture(flatListRef as any)
       .onStart((e) => {

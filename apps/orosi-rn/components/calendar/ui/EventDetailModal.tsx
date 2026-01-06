@@ -28,33 +28,47 @@ const getEventsForDate = (date: Date): CalendarEvent[] => {
 
 export const EventDetailModal = () => {
     const { detailModal, setDetailModal } = useCalendarStore();
-    const { isOpen, date } = detailModal;
+    const { isOpen, date, range } = detailModal;
 
-    const events = useMemo(() => {
-        if (!date) return [];
-        return getEventsForDate(date);
-    }, [date]);
+    const eventsGrouped = useMemo(() => {
+      console.log('range',  range)
+        if (range) {
+            const groups: { date: Date, events: CalendarEvent[] }[] = [];
+            let current = new Date(range.start);
+            const end = new Date(range.end);
+            
+            while (current <= end) {
+                const dayEvents = getEventsForDate(new Date(current));
+                if (dayEvents.length > 0) {
+                     groups.push({ date: new Date(current), events: dayEvents });
+                }
+                current.setDate(current.getDate() + 1);
+            }
+            return groups;
+        } else if (date) {
+            return [{ date: date, events: getEventsForDate(date) }];
+        }
+        return [];
+    }, [date, range]);
 
-    // We render the container even if closed, to allow 'exiting' animations to play.
-    // However, if we just return null, the exiting animation won't work because the component unmounts.
-    // So we return the container logic but rely on Reanimated's conditional rendering inside.
+    // Flatten for rendering but keep headers
+    const renderItems = useMemo(() => {
+        const items: any[] = [];
+        eventsGrouped.forEach(group => {
+            items.push({ type: 'header', date: group.date });
+            group.events.forEach(e => items.push({ type: 'event', data: e }));
+        });
+        return items;
+    }, [eventsGrouped]);
     
-    // Safety check just for data, but allow animation to proceed if isOpen is toggling.
-    // We persist the `date` during the exit animation by not relying on it being null if we don't render content.
-    // Actually, if date becomes null, we can't render the content.
-    // Ideally, the store should keep the date selected until the modal is fully closed?
-    // For now, let's assume `date` is valid if `isOpen` was true.
-    
-    // Logic:
-    // If we use { isOpen && <Animated.../> }, then when isOpen becomes false, it unmounts and EXITING runs.
-    
-    const onClose = () => setDetailModal(false, null);
+    // ... logic for close
+    const onClose = () => setDetailModal(false, null, null);
+
+    // Initial render check
+    const displayDate = range ? range.start : date;
 
     return (
         <View style={styles.absoluteContainer} pointerEvents="box-none"> 
-          {/* We use box-none so touches pass through when not visible/backdrop not present. */}
-          {/* Actually we want to block touches only when open. */}
-            
             {isOpen && (
              <React.Fragment>
                 {/* Backdrop */}
@@ -74,12 +88,17 @@ export const EventDetailModal = () => {
                     exiting={SlideOutDown.springify().damping(20).mass(1).stiffness(150)}
                     style={styles.modalContainer}
                 >
-                    {date && (
+                    {displayDate && (
                      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
                         <View style={styles.header}>
                             <View>
                                 <Text style={styles.headerTitle}>Events</Text>
-                                <Text style={styles.headerSubtitle}>{format(date, 'MMM d, yyyy')}</Text>
+                                <Text style={styles.headerSubtitle}>
+                                    {range 
+                                      ? `${format(range.start, 'MMM d')} — ${format(range.end, 'd, yyyy')}`
+                                      : format(displayDate, 'MMM d, yyyy')
+                                    }
+                                </Text>
                             </View>
                             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                                 <Text style={styles.closeButtonText}>✕</Text>
@@ -90,25 +109,38 @@ export const EventDetailModal = () => {
                             {/* Center Line */}
                             <View style={styles.centerLine} />
 
-                            {/* Date Header Marker */}
-                            <View style={styles.dateMarkerContainer}>
-                                <View style={styles.dateMarker}>
-                                    <Text style={styles.dateMarkerText}>{format(date, 'MMM d').toUpperCase()}</Text>
-                                </View>
-                            </View>
-
-                            {/* Events List */}
-                            {events.map((event, index) => {
-                                const isLeft = index % 2 === 0;
+                            {renderItems.map((item, index) => {
+                                if (item.type === 'header') {
+                                    return (
+                                        <View key={`header-${item.date.toISOString()}`} style={styles.dateMarkerContainer}>
+                                            <View style={styles.dateMarker}>
+                                                <Text style={styles.dateMarkerText}>{format(item.date, 'MMM d').toUpperCase()}</Text>
+                                            </View>
+                                        </View>
+                                    );
+                                }
+                                
+                                const event = item.data as CalendarEvent;
+                                // We need index relative to events only for left/right? 
+                                // Actually let's just use total index or calculate based on filtered events count?
+                                // Simple alternating is fine for visual flow.
+                                const isLeft = index % 2 !== 0; // Header is even (0), so first event (1) is Left? Let's check.
+                                // If item 0 is header, item 1 is event -> Left.
+                                // If item 2 is event -> Right.
+                                
                                 return (
-                                    <View key={event.id} style={[styles.timelineItem, isLeft ? styles.leftItem : styles.rightItem]}>
+                                    <View key={`${event.id}_${index}`} style={[styles.timelineItem, isLeft ? styles.leftItem : styles.rightItem]}>
                                         {/* Connector & Dot */}
                                         <View style={[styles.connectorContainer]}>
                                             <View style={[
                                                 styles.connectorLine, 
                                                 isLeft ? { right: '50%', marginRight: 5 } : { left: '50%', marginLeft: 5 }
                                             ]} />
-                                            <View style={[styles.dot, { backgroundColor: event.color }]} />
+                                            <View style={[styles.dot, { 
+                                                  backgroundColor: event.color, 
+                                                  marginLeft: -6
+                                                  // marginLeft: isLeft ? -8 : -2,
+                                                }]} />
                                         </View>
 
                                         {/* Content Card */}
@@ -212,8 +244,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     scrollContent: {
-        paddingVertical: 24,
-        paddingHorizontal: 16,
+        paddingVertical: 24, // Keep vertical, check if it affects absolute. Ideally remove this too if centerLine top is affected.
+        // removing horizontal padding to ensure centerLine (50%) is relative to full width
+        // and items handle their own padding.
     },
     centerLine: {
         position: 'absolute',
@@ -246,6 +279,7 @@ const styles = StyleSheet.create({
         width: '100%',
         position: 'relative',
         height: 80, // Approximate height
+        paddingHorizontal: 16, // Moved padding here
     },
     leftItem: {
         justifyContent: 'flex-start',
@@ -273,6 +307,8 @@ const styles = StyleSheet.create({
     cardContent: {
         width: '42%', // HTML reference uses 42%
         paddingVertical: 8,
+        backgroundColor: 'rgba(255, 255, 255, 0)', // Masking the connector line
+        zIndex: 10, // Ensure it sits on top of the connector
     },
     cardLeft: {
         // justifyContent handles position (flex-start)
@@ -289,13 +325,13 @@ const styles = StyleSheet.create({
     // Updated Connector Logic
     connectorLine: {
         position: 'absolute',
-        height: 1, // Border width essentially
-        top: 4, // distinct center offset relative to dot
-        width: '8%', // Gap size
-        borderTopWidth: 1,
+        height: 2, // Slight increase for visibility
+        top: 6, 
+        width: '50%', // FORCE OVERLAP: Fixed large width instead of % to guarantee it goes under the card
+        borderTopWidth: 1.5, // Thicker dash
         borderStyle: 'dashed',
         borderColor: '#BDBDBD',
-        zIndex: 0,
+        zIndex: -1, // Behind card
     },
     
     // We need to properly position the dashed line based on left/right
@@ -316,7 +352,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#333',
         position: 'absolute',
         left: '50%',
-        marginLeft: -6, // Center
         top: 0, 
         shadowColor: "#000",
         shadowOffset: {
@@ -339,6 +374,11 @@ const styles = StyleSheet.create({
         color: '#111',
         marginBottom: 2,
         lineHeight: 18,
+        backgroundColor: '#fff',
+        paddingHorizontal: 6,
+        boxSizing: 'border-box',
+        position: 'relative',
+        right: -6,
     },
     eventDesc: {
         fontSize: 10,

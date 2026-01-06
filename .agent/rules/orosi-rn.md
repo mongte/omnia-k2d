@@ -26,6 +26,7 @@ trigger: always_on
 ## code
 - 주석은 한글로 달아줘
 - view componet 에 각 의미에 맞게 testid 넣어줘
+- boolean 형태의 변수일 경우 is___, has___, can___등 조건부에 맞는 네이밍으로 작성
 
 ## setting
 - 한국말로 안내
