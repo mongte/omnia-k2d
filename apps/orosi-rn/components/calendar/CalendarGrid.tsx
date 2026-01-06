@@ -185,10 +185,23 @@ export function CalendarGrid({ width }: { width: number }) {
       }
   };
 
+  const setDetailModal = useCalendarStore(state => state.setDetailModal);
+
   const handleTap = (x: number, y: number) => {
       const date = getDateAtPoint(x, y);
       if (date) {
         toggleDaySelection(date);
+        
+        // Check for events to open modal
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const dayNum = date.getDate();
+        const eventsKey = `${year}-${month}-${dayNum}`;
+        const hasEvents = (STATIC_MOCK_EVENTS[eventsKey]?.length || 0) > 0;
+        
+        if (hasEvents) {
+            setDetailModal(true, date);
+        }
       }
   };
 

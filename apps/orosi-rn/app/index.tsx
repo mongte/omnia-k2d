@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CalendarHeader } from '@/components/calendar/CalendarHeader';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
+import { EventDetailModal } from '@/components/calendar/ui/EventDetailModal';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -30,6 +31,7 @@ export default function TabOneScreen() {
               width={containerWidth > 0 ? containerWidth : undefined}
             />
             {containerWidth > 0 && <CalendarGrid width={containerWidth} />}
+            <EventDetailModal />
          </View>
       </SafeAreaView>
     </View>

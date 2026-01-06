@@ -20,6 +20,13 @@ interface CalendarState {
 
   endSelection: () => void;
   setSelectedRange: (range: DateRange) => void;
+
+  // Modal State
+  detailModal: {
+    isOpen: boolean;
+    date: Date | null;
+  };
+  setDetailModal: (isOpen: boolean, date?: Date | null) => void;
   
   // Selectors (Helpers as functions if needed, or derived state)
   // Zustand specific: we can keep these as logic in components or helper functions here.
@@ -76,6 +83,9 @@ export const useCalendarStore = create<CalendarState>((set, get) => ({
 
   endSelection: () => set({ dragStarted: false }),
   setSelectedRange: (range) => set({ selectedRange: range }),
+  
+  detailModal: { isOpen: false, date: null },
+  setDetailModal: (isOpen, date = null) => set({ detailModal: { isOpen, date } }),
 }));
 
 // Helper Selectors
