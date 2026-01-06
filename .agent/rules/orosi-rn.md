@@ -26,3 +26,8 @@ trigger: always_on
 ## code
 - 주석은 한글로 달아줘
 - view componet 에 각 의미에 맞게 testid 넣어줘
+
+## setting
+- 한국말로 안내
+- 설명도 한글로 안내
+- 항상 먼저 어떤게 문지인지 원인은 무엇인지 해결방안은 어떻게되는지 plan을 설명함

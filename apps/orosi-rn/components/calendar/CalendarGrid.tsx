@@ -118,8 +118,8 @@ export function CalendarGrid({ width }: { width: number }) {
     focusedDayRef.current = focusedDay;
   }, [focusedDay]);
 
-  const CELL_WIDTH = width / 7;
-  const CELL_HEIGHT = CELL_WIDTH * 1.3;
+  const CELL_WIDTH = Math.floor(width / 7);
+  const CELL_HEIGHT = Math.floor(CELL_WIDTH * 1.3);
 
   // Generate Month Configs
   const monthConfigs = useMemo<MonthConfig[]>(() => {
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff', 
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: Colors.AppColors.gridLight,
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
       android: { elevation: 2 },

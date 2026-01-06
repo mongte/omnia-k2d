@@ -19,9 +19,8 @@ const TOTAL_MONTHS = 2400;
 
 export function CalendarHeader({ onOpenDrawer, width = 350 }: CalendarHeaderProps) {
   // width defaulting to 350 or screen width if not provided
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const themeColors = isDark ? Colors.dark : Colors.light;
+  // const colorScheme = useColorScheme(); // Removed to force light
+  const themeColors = Colors.light;
 
   const focusedDay = useCalendarStore(state => state.focusedDay);
   const setFocusedDay = useCalendarStore(state => state.setFocusedDay);
@@ -176,12 +175,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   yearText: {
-    fontSize: 28,
+    fontSize: 34,
     fontWeight: '900',
+    color: '#1A1A1A', // Sharp dark grey
   },
   monthText: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    letterSpacing: 1.0,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    marginTop: -4, // Pull closer to year
+    color: '#1A1A1A',
   }
 });

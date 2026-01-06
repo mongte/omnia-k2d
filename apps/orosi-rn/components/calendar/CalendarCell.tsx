@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Dimensions } from 'react-native';
 import { CalendarEvent } from './model/calendarTypes';
 import Colors from '@/constants/Colors';
-import { isSameDay } from 'date-fns';
+import { isSameDay, getDay } from 'date-fns';
 
 interface CalendarCellProps {
   day: number | null;
@@ -20,6 +20,7 @@ interface CalendarCellProps {
 // Memoized to prevent re-renders on every scroll/drag update
 export const CalendarCell = React.memo(({
   day,
+  date,
   isToday,
   isSelected,
   isRangeStart,
@@ -29,14 +30,24 @@ export const CalendarCell = React.memo(({
   onLongPress,
   cellWidth,
 }: CalendarCellProps) => {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  // const colorScheme = useColorScheme();
+  const theme = Colors.light;
   
   if (day === null) {
-      // Empty cell
-      return (
-          <View style={[styles.cell, { width: cellWidth, height: cellWidth * 1.3, borderColor: theme.grid, borderRightWidth: 1, borderBottomWidth: 1, backgroundColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(128,128,128,0.05)' }]} testID="CalendarCell-Empty" />
-      );
+    // Empty cell
+    return (
+      <View style={[
+        styles.cell, 
+        { 
+          width: cellWidth, 
+          height: cellWidth * 1.3, 
+          borderColor: theme.grid, 
+          borderRightWidth: 1, 
+          borderBottomWidth: 1, 
+          backgroundColor: theme.tableCellEmpty 
+        }
+      ]} testID="CalendarCell-Empty" />
+    );
   }
 
   return (
@@ -89,11 +100,18 @@ export const CalendarCell = React.memo(({
           We can render a background color if selected.
       */}
       {isSelected && (
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.AppColors.primary, opacity: 0.1 }]} pointerEvents="none" testID="CalendarCell-SelectionOverlay" />
-      )}
-       {/* Range Borders - Simplified for MVP, Flutter one drew lines manually */}
-      {isSelected && (
-          <View style={[StyleSheet.absoluteFill, { borderWidth: 2, borderColor: Colors.AppColors.primary }]} pointerEvents="none" testID="CalendarCell-BorderOverlay" />
+          <View style={[StyleSheet.absoluteFill, { 
+            borderTopWidth: 2,
+            borderBottomWidth: 2,
+            borderLeftWidth: (isRangeStart || getDay(date) === 0) ? 2 : 0,
+            borderRightWidth: (isRangeEnd || getDay(date) === 6) ? 2 : 0,
+            borderColor: Colors.AppColors.primary,
+            borderTopLeftRadius: (isRangeStart || getDay(date) === 0) ? 6 : 0,
+            borderBottomLeftRadius: (isRangeStart || getDay(date) === 0) ? 6 : 0,
+            borderTopRightRadius: (isRangeEnd || getDay(date) === 6) ? 6 : 0,
+            borderBottomRightRadius: (isRangeEnd || getDay(date) === 6) ? 6 : 0,
+            backgroundColor: 'rgba(0, 214, 86, 0.05)' 
+          }]} pointerEvents="none" testID="CalendarCell-SelectionOverlay" />
       )}
 
     </View>
@@ -128,31 +146,32 @@ const styles = StyleSheet.create({
       backgroundColor: Colors.AppColors.primary,
       alignItems: 'center',
       justifyContent: 'center',
+      marginTop: 2, // Slight adjustment
   },
   todayText: {
       color: '#000',
       fontWeight: 'bold',
+      fontSize: 13,
   },
   dayText: {
-      fontWeight: '500',
+      fontWeight: '600',
+      marginTop: 6,
+      fontSize: 13,
   },
   dotsRow: {
       flexDirection: 'row',
       flexWrap: 'wrap-reverse', // Wraps from bottom-left up
       alignContent: 'flex-start', // Lines pack to the start (bottom in wrap-reverse context)
       width: '100%',
-      // Ensure specific height or just fill? 
-      // Flex 1 in parent helps.
-      marginTop: 2, 
+      marginBottom: 4, // Space from bottom
+      paddingHorizontal: 4,
+      gap: 3, // Horizontal gap
+      rowGap: 3, // Vertical gap
   },
   dot: {
-      width: 8,
-      height: 8,
-      borderRadius: 1, // Square with slight radius
-      marginRight: 2,
-      marginTop: 2, // Space between rows (visually above because of wrap-reverse?)
-      // Actually with wrap-reverse, 'marginTop' adds space *above* the item in the line.
-      // Lines stack bottom-to-top.
+      width: 10, // Larger for square look
+      height: 10,
+      borderRadius: 3, // Rounded square
   },
 
 });
