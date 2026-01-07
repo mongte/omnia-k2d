@@ -32,3 +32,4 @@ trigger: always_on
 - 한국말로 안내
 - 설명도 한글로 안내
 - 항상 먼저 어떤게 문지인지 원인은 무엇인지 해결방안은 어떻게되는지 plan을 설명함
+- implementation plan을 새우고 검사 받고 진행

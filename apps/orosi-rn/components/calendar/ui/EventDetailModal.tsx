@@ -13,6 +13,8 @@ import Colors from '@/constants/Colors';
 import { useCalendarStore } from '../model/useCalendarStore';
 import { CalendarEvent } from '../model/calendarTypes';
 import { BlurView } from 'expo-blur';
+import { Feather } from '@expo/vector-icons';
+import Svg, { Path, Line } from 'react-native-svg';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -70,18 +72,46 @@ const getEventsForDate = (date: Date): CalendarEventDisplayInfo[] => {
 const getEventDotStyle = (event: CalendarEventDisplayInfo, isLeft: boolean): EventDotStyle => {
   const { color, isMultiDay, isRangeStart, isRangeEnd, isContinuing } = event;
 
-  if (!isMultiDay) {
-    return {
-      backgroundColor: color,
-      marginLeft: -6
-    }
-  }
-
   return {
     backgroundColor: color,
-    marginLeft: isLeft ? -8 : -2
+    marginLeft: -6
   }
 }
+
+const ConnectorArrow = ({ direction, color }: { direction: 'up' | 'down', color: string }) => {
+    // Design: A rounded arrow. 
+    // Line length 18.
+    // Arrow head size ~ 6.
+    
+    // Up Arrow: Line goes from bottom (20) to top (0). Head at top.
+    // Down Arrow: Line goes from top (0) to bottom (20). Head at bottom.
+    
+    const strokeWidth = 2.5;
+    
+    // SVG ViewBox 0 0 14 20
+    // Center X = 7
+    
+    if (direction === 'up') {
+      return (
+        <Svg width={14} height={20} viewBox="0 0 14 20" style={{ marginBottom: -2 }}>
+           {/* Line from bottom up */}
+           <Line x1="7" y1="20" x2="7" y2="2" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
+           {/* Arrow Head */}
+           <Path d="M 3 6 L 7 2 L 11 6" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
+        </Svg>
+      );
+    } else {
+       return (
+        <Svg width={14} height={20} viewBox="0 0 14 20" style={{ marginTop: -2 }}>
+           {/* Line from top down */}
+           <Line x1="7" y1="0" x2="7" y2="18" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
+           {/* Arrow Head */}
+           <Path d="M 3 14 L 7 18 L 11 14" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
+        </Svg>
+      );
+    }
+}
+
 
 export const EventDetailModal = () => {
   const { detailModal, setDetailModal } = useCalendarStore();
@@ -220,31 +250,42 @@ export const EventDetailModal = () => {
 
                     // console.log(`Event ${event.title}: isMultiDay=${isMultiDay}, Start=${isRangeStart}, End=${isRangeEnd}, Continuing=${isContinuing}`);
 
-                    return (
-                      <View
-                        key={`${event.id}_${index}`}
-                        style={[
-                          styles.timelineItem,
-                          isLeft ? styles.leftItem : styles.rightItem,
-                        ]}
-                      >
-                        {/* Connector & Dot */}
-                        <View style={[styles.connectorContainer]}>
-                          <View
-                            style={[
-                              styles.connectorLine,
-                              isLeft
-                                ? { right: '50%', marginRight: 5 }
-                                : { left: '50%', marginLeft: 5 },
-                            ]}
-                          />
-                          <View
-                            style={[
-                              styles.dot,
-                              getEventDotStyle(event, isLeft),
-                            ]}
-                          />
-                        </View>
+                  // Dot styling for centering logic
+                  const dotStyle = getEventDotStyle(event, isLeft);
+
+                  return (
+                      <View key={`${event.id}_${index}`} style={[styles.timelineItem, isLeft ? styles.leftItem : styles.rightItem]}>
+                          {/* Connector & Dot */}
+                          <View style={[styles.connectorContainer]}>
+                              <View style={[
+                                  styles.connectorLine, 
+                                  isLeft ? { right: '50%', marginRight: 5 } : { left: '50%', marginLeft: 5 }
+                              ]} />
+                              
+                              {/* Connector Arrows */}
+                              {(isContinuing || isRangeEnd) && (
+                                <View style={{
+                                    position: 'absolute',
+                                    top: -20, // Height of arrow
+                                    left: '50%',
+                                    marginLeft: (dotStyle.marginLeft as number) - 1, // 14/2 = 7 center. Dot is 12 -> center 6. Offset -1
+                                }}>
+                                   <ConnectorArrow direction="up" color={event.color} />
+                                </View>
+                              )}
+                              {(isContinuing || isRangeStart) && (
+                                <View style={{
+                                    position: 'absolute',
+                                    top: 12, // Dot height 12 
+                                    left: '50%',
+                                    marginLeft: (dotStyle.marginLeft as number) - 1,
+                                }}>
+                                    <ConnectorArrow direction="down" color={event.color} />
+                                </View>
+                              )}
+
+                              <View style={[styles.dot, dotStyle]} />
+                          </View>
 
                         {/* Content Card */}
                         <View
