@@ -1,121 +1,112 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Modal,
   TouchableOpacity,
   ScrollView,
-  Platform,
 } from 'react-native';
 import { format, isSameDay } from 'date-fns';
-import Colors from '@/constants/Colors';
 import { useCalendarStore } from '../model/useCalendarStore';
-import { CalendarEvent } from '../model/calendarTypes';
+import { useCalendarQueries } from '../model/useCalendarQueries';
 import { BlurView } from 'expo-blur';
-import { Feather } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import Svg, { Path, Line } from 'react-native-svg';
 import Animated, {
   FadeIn,
   FadeOut,
-  SlideInDown,
-  SlideOutDown,
+  SlideInRight,
+  SlideOutRight,
+  SlideInLeft,
+  SlideOutLeft,
+  ZoomIn,
+  ZoomOut,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { EventDetailView } from './EventDetailView';
 
-/* 
-  Mocking event data fetching or receiving it as props.
-  In a real app, we might fetch from store based on ID.
-  Here we will receive events or filter them from the static mock data.
-*/
-import mockData from '../model/mockData.json';
-
-// Extended interface for display logic
-interface CalendarEventDisplayInfo extends CalendarEvent {
-  isMultiDay: boolean;
-  isRangeStart: boolean;
-  isRangeEnd: boolean;
-  isContinuing: boolean;
-}
+import { CalendarEventDisplayInfo } from '../model/calendarTypes';
 
 interface EventDotStyle {
   backgroundColor: string;
   marginLeft: number;
 }
 
-// Helper to get events for a date
-const getEventsForDate = (date: Date): CalendarEventDisplayInfo[] => {
-  const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-  const rawEvents = (mockData.events as any)[key] || [];
-
-  return rawEvents.map((e: any) => {
-    const startTime = new Date(e.startTime);
-    const endTime = new Date(e.endTime);
-
-    const isMultiDay = !isSameDay(startTime, endTime);
-    const isRangeStart = isSameDay(startTime, date);
-    const isRangeEnd = isSameDay(endTime, date);
-    const isContinuing = isMultiDay && !isRangeStart && !isRangeEnd;
-
-    return {
-      ...e,
-      startTime,
-      endTime,
-      isMultiDay,
-      isRangeStart,
-      isRangeEnd,
-      isContinuing,
-    };
-  });
-};
-
-const getEventDotStyle = (event: CalendarEventDisplayInfo, isLeft: boolean): EventDotStyle => {
-  const { color, isMultiDay, isRangeStart, isRangeEnd, isContinuing } = event;
-
-  return {
-    backgroundColor: color,
-    marginLeft: -6
-  }
-}
-
 const ConnectorArrow = ({ direction, color }: { direction: 'up' | 'down', color: string }) => {
-    // Design: A rounded arrow. 
-    // Line length 18.
-    // Arrow head size ~ 6.
-    
-    // Up Arrow: Line goes from bottom (20) to top (0). Head at top.
-    // Down Arrow: Line goes from top (0) to bottom (20). Head at bottom.
-    
     const strokeWidth = 2.5;
-    
-    // SVG ViewBox 0 0 14 20
-    // Center X = 7
-    
     if (direction === 'up') {
       return (
         <Svg width={14} height={20} viewBox="0 0 14 20" style={{ marginBottom: -2 }}>
-           {/* Line from bottom up */}
            <Line x1="7" y1="20" x2="7" y2="2" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
-           {/* Arrow Head */}
            <Path d="M 3 6 L 7 2 L 11 6" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
         </Svg>
       );
     } else {
        return (
         <Svg width={14} height={20} viewBox="0 0 14 20" style={{ marginTop: -2 }}>
-           {/* Line from top down */}
            <Line x1="7" y1="0" x2="7" y2="18" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
-           {/* Arrow Head */}
            <Path d="M 3 14 L 7 18 L 11 14" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
         </Svg>
       );
     }
 }
 
-
 export const EventDetailModal = () => {
   const { detailModal, setDetailModal } = useCalendarStore();
   const { isOpen, date, range } = detailModal;
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEventDisplayInfo | null>(null);
+  const [isReturning, setIsReturning] = useState(false);
+
+  // Fetch events for the month of the selected date/range
+  const queryDate = date || range?.start || new Date();
+  const { data: monthEvents } = useCalendarQueries().useMonthEvents(queryDate);
+
+  // Helper to filter events from the fetched month data
+  const getEventsForDate = (targetDate: Date, allEvents: any[] | undefined): CalendarEventDisplayInfo[] => {
+    if (!allEvents) return [];
+
+    // Filter events valid for this day
+    // DB events have start_time/end_time as ISO strings
+    const eventsOnDay = allEvents.filter(e => {
+        const start = new Date(e.start_time);
+        const end = new Date(e.end_time);
+        
+        // Check overlap (same logic as before effectively)
+        return isSameDay(start, targetDate) || 
+               isSameDay(end, targetDate) || 
+               (start < targetDate && end > targetDate); 
+    });
+
+    return eventsOnDay.map((e: any) => {
+        const startTime = new Date(e.start_time);
+        const endTime = new Date(e.end_time);
+
+        const isMultiDay = !isSameDay(startTime, endTime);
+        const isRangeStart = isSameDay(startTime, targetDate);
+        const isRangeEnd = isSameDay(endTime, targetDate);
+        const isContinuing = isMultiDay && !isRangeStart && !isRangeEnd;
+
+        return {
+          id: e.id,
+          title: e.title,
+          color: e.color || '#ccc',
+          startTime,
+          endTime,
+          isMultiDay,
+          isRangeStart,
+          isRangeEnd,
+          isContinuing,
+        };
+    });
+  };
+
+  const getEventDotStyle = (event: CalendarEventDisplayInfo, isLeft: boolean): EventDotStyle => {
+    const { color } = event;
+    return {
+      backgroundColor: color,
+      marginLeft: -6
+    }
+  }
 
   const eventsGrouped = useMemo(() => {
     if (range) {
@@ -124,7 +115,7 @@ export const EventDetailModal = () => {
       const end = new Date(range.end);
 
       while (current <= end) {
-        const dayEvents = getEventsForDate(new Date(current));
+        const dayEvents = getEventsForDate(new Date(current), monthEvents);
         if (dayEvents.length > 0) {
           groups.push({ date: new Date(current), events: dayEvents });
         }
@@ -132,10 +123,10 @@ export const EventDetailModal = () => {
       }
       return groups;
     } else if (date) {
-      return [{ date: date, events: getEventsForDate(date) }];
+      return [{ date: date, events: getEventsForDate(date, monthEvents) }];
     }
     return [];
-  }, [date, range]);
+  }, [date, range, monthEvents]);
 
   // Flatten for rendering but keep headers
   const renderItems = useMemo(() => {
@@ -147,10 +138,14 @@ export const EventDetailModal = () => {
     return items;
   }, [eventsGrouped]);
 
-  // ... logic for close
-  const onClose = () => setDetailModal(false, null, null);
+  const onClose = () => {
+    setDetailModal(false, null, null);
+    setTimeout(() => {
+      setSelectedEvent(null);
+      setIsReturning(false);
+    }, 300);
+  };
 
-  // Initial render check
   const displayDate = range ? range.start : date;
 
   return (
@@ -178,178 +173,191 @@ export const EventDetailModal = () => {
 
           {/* Modal Content */}
           <Animated.View
-            entering={SlideInDown.springify()
+            entering={ZoomIn.springify()
               .damping(20)
               .mass(1)
               .stiffness(150)}
-            exiting={SlideOutDown.springify()
+            exiting={ZoomOut.springify()
               .damping(20)
               .mass(1)
               .stiffness(150)}
             style={styles.modalContainer}
           >
             {displayDate && (
-              <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-                <View style={styles.header}>
-                  <View>
-                    <Text style={styles.headerTitle}>Events</Text>
-                    <Text style={styles.headerSubtitle}>
-                      {range
-                        ? `${format(range.start, 'MMM d')} — ${format(
-                            range.end,
-                            'd, yyyy'
-                          )}`
-                        : format(displayDate, 'MMM d, yyyy')}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={onClose}
-                    style={styles.closeButton}
-                  >
-                    <Text style={styles.closeButtonText}>✕</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView
-                  style={styles.scrollView}
-                  contentContainerStyle={styles.scrollContent}
-                >
-                  {/* Center Line */}
-                  <View style={styles.centerLine} />
-
-                  {renderItems.map((item, index) => {
-                    if (item.type === 'header') {
-                      return (
-                        <View
-                          key={`header-${item.date.toISOString()}`}
-                          style={styles.dateMarkerContainer}
-                        >
-                          <View style={styles.dateMarker}>
-                            <Text style={styles.dateMarkerText}>
-                              {format(item.date, 'MMM d').toUpperCase()}
+                selectedEvent ? (
+                    <Animated.View 
+                        key="detail-view"
+                        style={{ flex: 1 }} 
+                        entering={SlideInRight} 
+                        exiting={SlideOutRight}
+                    >
+                        <EventDetailView 
+                            event={selectedEvent} 
+                            onBack={() => {
+                              setIsReturning(true);
+                              setSelectedEvent(null);
+                            }} 
+                        />
+                    </Animated.View>
+                ) : (
+                    <Animated.View 
+                        key="list-view"
+                        style={{ flex: 1 }} 
+                        entering={isReturning ? SlideInLeft : undefined} 
+                        exiting={SlideOutLeft}
+                    >
+                      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+                        <View style={styles.header}>
+                          <View>
+                            <Text style={styles.headerTitle}>Events</Text>
+                            <Text style={styles.headerSubtitle}>
+                              {range
+                                ? `${format(range.start, 'MMM d')} — ${format(
+                                    range.end,
+                                    'd, yyyy'
+                                  )}`
+                                : format(displayDate, 'MMM d, yyyy')}
                             </Text>
                           </View>
+                          <TouchableOpacity
+                            onPress={onClose}
+                            style={styles.closeButton}
+                          >
+                            <Text style={styles.closeButtonText}>✕</Text>
+                          </TouchableOpacity>
                         </View>
-                      );
-                    }
 
-                    const event = item.data as CalendarEventDisplayInfo;
-                    // We need index relative to events only for left/right?
-                    // Actually let's just use total index or calculate based on filtered events count?
-                    // Simple alternating is fine for visual flow.
-                    const isLeft = index % 2 !== 0; // Header is even (0), so first event (1) is Left? Let's check.
-                    // If item 0 is header, item 1 is event -> Left.
-                    // If item 2 is event -> Right.
-
-                    const {
-                      isMultiDay,
-                      isRangeStart,
-                      isRangeEnd,
-                      isContinuing,
-                    } = event;
-
-                    // console.log(`Event ${event.title}: isMultiDay=${isMultiDay}, Start=${isRangeStart}, End=${isRangeEnd}, Continuing=${isContinuing}`);
-
-                  // Dot styling for centering logic
-                  const dotStyle = getEventDotStyle(event, isLeft);
-
-                  return (
-                      <View key={`${event.id}_${index}`} style={[styles.timelineItem, isLeft ? styles.leftItem : styles.rightItem]}>
-                          {/* Connector & Dot */}
-                          <View style={[styles.connectorContainer]}>
-                              <View style={[
-                                  styles.connectorLine, 
-                                  isLeft ? { right: '50%', marginRight: 5 } : { left: '50%', marginLeft: 5 }
-                              ]} />
-                              
-                              {/* Connector Arrows */}
-                              {(isContinuing || isRangeEnd) && (
-                                <View style={{
-                                    position: 'absolute',
-                                    top: -20, // Height of arrow
-                                    left: '50%',
-                                    marginLeft: (dotStyle.marginLeft as number) - 1, // 14/2 = 7 center. Dot is 12 -> center 6. Offset -1
-                                }}>
-                                   <ConnectorArrow direction="up" color={event.color} />
-                                </View>
-                              )}
-                              {(isContinuing || isRangeStart) && (
-                                <View style={{
-                                    position: 'absolute',
-                                    top: 12, // Dot height 12 
-                                    left: '50%',
-                                    marginLeft: (dotStyle.marginLeft as number) - 1,
-                                }}>
-                                    <ConnectorArrow direction="down" color={event.color} />
-                                </View>
-                              )}
-
-                              <View style={[styles.dot, dotStyle]} />
-                          </View>
-
-                        {/* Content Card */}
-                        <View
-                          style={[
-                            styles.cardContent,
-                            isLeft ? styles.cardLeft : styles.cardRight,
-                          ]}
+                        <ScrollView
+                          style={styles.scrollView}
+                          contentContainerStyle={styles.scrollContent}
                         >
-                          <Text
-                            style={[
-                              styles.timeText,
-                              { color: event.color },
-                              isLeft
-                                ? extraStyles.textAlignRight
-                                : extraStyles.textAlignLeft,
-                            ]}
-                          >
-                            {format(event.startTime, 'hh:mm a')}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.eventTitle,
-                              isLeft
-                                ? extraStyles.textAlignRight
-                                : extraStyles.textAlignLeft,
-                            ]}
-                          >
-                            {event.title}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.eventDesc,
-                              isLeft
-                                ? extraStyles.textAlignRight
-                                : extraStyles.textAlignLeft,
-                            ]}
-                            numberOfLines={2}
-                          >
-                            No description
-                          </Text>
+                          {/* Center Line */}
+                          <View style={styles.centerLine} />
 
-                          {/* Indicator Bar */}
-                          <View
-                            style={[
-                              styles.indicatorBar,
-                              { backgroundColor: event.color },
-                            ]}
-                          />
+                          {renderItems.map((item, index) => {
+                            if (item.type === 'header') {
+                              return (
+                                <View
+                                  key={`header-${item.date.toISOString()}`}
+                                  style={styles.dateMarkerContainer}
+                                >
+                                  <View style={styles.dateMarker}>
+                                    <Text style={styles.dateMarkerText}>
+                                      {format(item.date, 'MMM d').toUpperCase()}
+                                    </Text>
+                                  </View>
+                                </View>
+                              );
+                            }
+
+                            const event = item.data as CalendarEventDisplayInfo;
+                            const isLeft = index % 2 !== 0; 
+                            const {
+                              isMultiDay,
+                              isRangeStart,
+                              isRangeEnd,
+                              isContinuing,
+                            } = event;
+
+                          const dotStyle = getEventDotStyle(event, isLeft);
+
+                          return (
+                              <View key={`${event.id}_${index}`} style={[styles.timelineItem, isLeft ? styles.leftItem : styles.rightItem]}>
+                                  {/* Connector & Dot */}
+                                  <View style={[styles.connectorContainer]}>
+                                      <View style={[
+                                          styles.connectorLine, 
+                                          isLeft ? { right: '50%', marginRight: 5 } : { left: '50%', marginLeft: 5 }
+                                      ]} />
+                                      
+                                      {(isContinuing || isRangeEnd) && (
+                                        <View style={{
+                                            position: 'absolute',
+                                            top: -20, 
+                                            left: '50%',
+                                            marginLeft: (dotStyle.marginLeft as number) - 1, 
+                                        }}>
+                                           <ConnectorArrow direction="up" color={event.color} />
+                                        </View>
+                                      )}
+                                      {(isContinuing || isRangeStart) && (
+                                        <View style={{
+                                            position: 'absolute',
+                                            top: 12, 
+                                            left: '50%',
+                                            marginLeft: (dotStyle.marginLeft as number) - 1,
+                                        }}>
+                                            <ConnectorArrow direction="down" color={event.color} />
+                                        </View>
+                                      )}
+
+                                      <View style={[styles.dot, dotStyle]} />
+                                  </View>
+
+                                {/* Content Card */}
+                                <TouchableOpacity
+                                  activeOpacity={0.9}
+                                  onPress={() => setSelectedEvent(event)}
+                                  style={[
+                                    styles.cardContent,
+                                    isLeft ? styles.cardLeft : styles.cardRight,
+                                  ]}
+                                >
+                                  <Text
+                                    style={[
+                                      styles.timeText,
+                                      { color: event.color },
+                                      isLeft
+                                        ? extraStyles.textAlignRight
+                                        : extraStyles.textAlignLeft,
+                                    ]}
+                                  >
+                                    {format(event.startTime, 'hh:mm a')}
+                                  </Text>
+                                  <Text
+                                    style={[
+                                      styles.eventTitle,
+                                      isLeft
+                                        ? extraStyles.textAlignRight
+                                        : extraStyles.textAlignLeft,
+                                    ]}
+                                  >
+                                    {event.title}
+                                  </Text>
+                                  <Text
+                                    style={[
+                                      styles.eventDesc,
+                                      isLeft
+                                        ? extraStyles.textAlignRight
+                                        : extraStyles.textAlignLeft,
+                                    ]}
+                                    numberOfLines={2}
+                                  >
+                                    Tap for details
+                                  </Text>
+
+                                  <View
+                                    style={[
+                                      styles.indicatorBar,
+                                      { backgroundColor: event.color },
+                                    ]}
+                                  />
+                                </TouchableOpacity>
+                              </View>
+                            );
+                          })}
+
+                          <View style={{ height: 100 }} />
+                        </ScrollView>
+
+                        <View style={styles.footer}>
+                          <TouchableOpacity style={styles.addButton}>
+                            <Text style={styles.addButtonText}>+ Add New Event</Text>
+                          </TouchableOpacity>
                         </View>
-                      </View>
-                    );
-                  })}
-
-                  {/* Bottom Padding */}
-                  <View style={{ height: 100 }} />
-                </ScrollView>
-
-                {/* Floating Add Button */}
-                <View style={styles.footer}>
-                  <TouchableOpacity style={styles.addButton}>
-                    <Text style={styles.addButtonText}>+ Add New Event</Text>
-                  </TouchableOpacity>
-                </View>
-              </SafeAreaView>
+                      </SafeAreaView>
+                    </Animated.View>
+                )
             )}
           </Animated.View>
         </React.Fragment>
@@ -362,22 +370,19 @@ const styles = StyleSheet.create({
   absoluteContainer: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1000,
-    justifyContent: 'flex-end',
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center', 
+    alignItems: 'center',     
   },
   modalContainer: {
     backgroundColor: '#fff',
-    height: '85%',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    width: '90%',      
+    height: '70%',     
+    borderRadius: 24,  
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 4 }, 
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 20,
     overflow: 'hidden',
   },
   header: {
@@ -421,9 +426,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollContent: {
-    paddingVertical: 24, // Keep vertical, check if it affects absolute. Ideally remove this too if centerLine top is affected.
-    // removing horizontal padding to ensure centerLine (50%) is relative to full width
-    // and items handle their own padding.
+    paddingVertical: 24, 
   },
   centerLine: {
     position: 'absolute',
@@ -455,8 +458,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     width: '100%',
     position: 'relative',
-    height: 80, // Approximate height
-    paddingHorizontal: 16, // Moved padding here
+    height: 80, 
+    paddingHorizontal: 16, 
   },
   leftItem: {
     justifyContent: 'flex-start',
@@ -464,7 +467,6 @@ const styles = StyleSheet.create({
   rightItem: {
     justifyContent: 'flex-end',
   },
-  // ... (previous layout props)
   connectorContainer: {
     position: 'absolute',
     top: 24,
@@ -474,58 +476,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 2,
   },
-  connectorLeft: {
-    // Connector line needs to go from Center Dot to Left Content
-  },
-  connectorRight: {
-    // Connector line needs to go from Center Dot to Right Content
-  },
-
   cardContent: {
-    width: '42%', // HTML reference uses 42%
+    width: '42%',
     paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0)', // Masking the connector line
-    zIndex: 10, // Ensure it sits on top of the connector
+    backgroundColor: 'rgba(255, 255, 255, 0)', 
+    zIndex: 10, 
   },
   cardLeft: {
-    // justifyContent handles position (flex-start)
-    // Ensure content aligns to the right edge of this container
     alignItems: 'flex-end',
-    paddingRight: 12, // HTML uses 12px
+    paddingRight: 12, 
   },
   cardRight: {
-    // justifyContent handles position (flex-end)
     alignItems: 'flex-start',
-    paddingLeft: 12, // HTML uses 12px
+    paddingLeft: 12, 
   },
-
-  // Updated Connector Logic
   connectorLine: {
     position: 'absolute',
-    height: 2, // Slight increase for visibility
+    height: 2, 
     top: 6,
-    width: '50%', // FORCE OVERLAP: Fixed large width instead of % to guarantee it goes under the card
-    borderTopWidth: 1.5, // Thicker dash
+    width: '50%', 
+    borderTopWidth: 1.5, 
     borderStyle: 'dashed',
     borderColor: '#BDBDBD',
-    zIndex: -1, // Behind card
+    zIndex: -1, 
   },
-
-  // We need to properly position the dashed line based on left/right
-  // The previous structure had the connector inside a container.
-  // Let's refine the render logic in the main component instead of just styles if needed,
-  // but we can try to achieve it with styles first.
-
-  // Actually, to match the HTML's "timeline-connector absolute... width: 8%"
-  // HTML: .timeline-item.left .timeline-connector { right: 50%; margin-right: 4px; }
-  // We can simulate this.
-
   dot: {
-    width: 12, // Increased size
+    width: 12, 
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#fff', // White border as requested
+    borderColor: '#fff', 
     backgroundColor: '#333',
     position: 'absolute',
     left: '50%',
@@ -539,7 +519,6 @@ const styles = StyleSheet.create({
     shadowRadius: 1.0,
     elevation: 1,
   },
-
   timeText: {
     fontSize: 12,
     fontWeight: '600',
@@ -547,15 +526,13 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 14,
-    fontWeight: 'bold', // Bolder
+    fontWeight: 'bold', 
     color: '#111',
     marginBottom: 2,
     lineHeight: 18,
     backgroundColor: '#fff',
     paddingHorizontal: 6,
-    boxSizing: 'border-box',
-    position: 'relative',
-    right: -6,
+    right: -6, // Correction from previous file, kept relative
   },
   eventDesc: {
     fontSize: 10,
@@ -564,11 +541,10 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
   indicatorBar: {
-    height: 4, // Thinner
+    height: 4, 
     width: '100%',
     borderRadius: 2,
   },
-
   footer: {
     padding: 16,
     borderTopWidth: 1,
@@ -576,7 +552,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   addButton: {
-    backgroundColor: '#111', // Darker black
+    backgroundColor: '#111', 
     borderRadius: 14,
     height: 52,
     alignItems: 'center',
@@ -589,7 +565,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
-    flexDirection: 'row', // For icon if added
+    flexDirection: 'row', 
     gap: 8,
   },
   addButtonText: {
@@ -599,7 +575,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Patch styles for proper alignment
 const extraStyles = StyleSheet.create({
   textAlignRight: {
     textAlign: 'right',

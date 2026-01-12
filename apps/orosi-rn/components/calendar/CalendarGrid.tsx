@@ -3,25 +3,18 @@ import {
   View,
   StyleSheet,
   FlatList,
-  Dimensions,
   Text,
-  TouchableOpacity,
   ViewToken,
   Platform,
 } from 'react-native';
 import { useCalendarStore } from './model/useCalendarStore';
-import { CalendarCell } from './CalendarCell';
 import Colors from '@/constants/Colors';
 import {
   getDaysInMonth,
   startOfMonth,
   endOfMonth,
   getDay,
-  addMonths,
-  isSameDay,
   isSameMonth,
-  isAfter,
-  isBefore,
 } from 'date-fns';
 import Animated, {
   useSharedValue,
@@ -30,21 +23,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
+import { MonthConfig } from './model/calendarTypes';
+import { MonthItem } from './ui/MonthItem';
 
 const BASE_YEAR = 2000;
 const TOTAL_MONTHS = 2400; // 200 years
-
-// Pre-calculate heights for performance
-// SCREEN_WIDTH removed, passing as prop
-
-interface MonthConfig {
-  date: Date;
-  offset: number;
-  height: number;
-  rows: number;
-  startOffset: number; // Empty cells before 1st day
-  daysInMonth: number;
-}
 
 const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
@@ -53,54 +36,33 @@ const VIEWABILITY_CONFIG = {
   minimumViewTime: 100, // Debounce slightly
 };
 
-import mockData from './model/mockData.json';
+interface CalendarGridProps {
+  width: number;
+  focusedDay?: Date;
+  onPressDay?: (date: Date) => void;
+  onFocusedDayChange?: (date: Date) => void;
+  selectedRange?: { start: Date; end: Date } | null;
+}
 
-const EMPTY_EVENTS: any[] = [];
-let STATIC_MOCK_EVENTS: Record<string, any[]> = {};
-let STATIC_CONTINUING_IDS: Record<string, Set<string>> = {};
-const EMPTY_SET = new Set<string>();
-
-const initMockData = () => {
-  if (Object.keys(STATIC_MOCK_EVENTS).length > 0) return;
-
-  // Parse JSON data (convert string dates back to Date objects if needed,
-  // though CalendarCell might need Date objects. The JSON has ISO strings).
-  // Let's assume we parse them here to maintain internal consistency.
-  const { events, continuing } = mockData;
-
-  // Convert events
-  Object.keys(events).forEach((key) => {
-    STATIC_MOCK_EVENTS[key] = (events as any)[key].map((e: any) => ({
-      ...e,
-      startTime: new Date(e.startTime),
-      endTime: new Date(e.endTime),
-    }));
-  });
-
-  // Convert continuing IDs (Array -> Set)
-  Object.keys(continuing).forEach((key) => {
-    STATIC_CONTINUING_IDS[key] = new Set((continuing as any)[key]);
-  });
-};
-
-initMockData();
-
-export function CalendarGrid({ width }: { width: number }) {
+export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, onFocusedDayChange, selectedRange: propSelectedRange }: CalendarGridProps) {
   const flatListRef = useRef<FlatList>(null);
   const [layoutReady, setLayoutReady] = useState(false);
+  const containerHeight = useRef(0);
   const isProgrammaticScroll = useRef(false);
   const programmaticScrollTimeout = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
 
-  const focusedDay = useCalendarStore((state) => state.focusedDay);
+  const storeFocusedDay = useCalendarStore((state) => state.focusedDay);
+  const focusedDay = propFocusedDay ?? storeFocusedDay;
   const setFocusedDay = useCalendarStore((state) => state.setFocusedDay);
   const lastUpdateSource = useCalendarStore((state) => state.lastUpdateSource);
   const isYearScrolling = useCalendarStore((state) => state.isYearScrolling);
   const toggleDaySelection = useCalendarStore(
     (state) => state.toggleDaySelection
   );
-  const selectedRange = useCalendarStore((state) => state.selectedRange);
+  const storeSelectedRange = useCalendarStore((state) => state.selectedRange);
+  const selectedRange = propSelectedRange !== undefined ? propSelectedRange : storeSelectedRange;
   const setSelectedRange = useCalendarStore((state) => state.setSelectedRange);
 
   // Gesture State
@@ -141,8 +103,6 @@ export function CalendarGrid({ width }: { width: number }) {
       const totalCellsUsed = emptyCells + days;
       const rows = Math.ceil(totalCellsUsed / 7);
 
-      // Spacing logic from Flutter:
-      // "If the month ends on a Saturday... add a GAP ROW"
       const lastDay = endOfMonth(date);
       const isLastDaySaturday = getDay(lastDay) === 6;
 
@@ -161,11 +121,10 @@ export function CalendarGrid({ width }: { width: number }) {
       accumulatedOffset += height;
     }
     return configs;
-  }, [width]); // Re-calculate on width change
+  }, [width]);
 
   // Calculate Date from Point logic
   const getDateAtPoint = (x: number, y: number): Date | null => {
-    // Global Y accounting for scroll
     const absoluteY = y + scrollY.value;
 
     const config = monthConfigs.find(
@@ -190,7 +149,6 @@ export function CalendarGrid({ width }: { width: number }) {
     return null;
   };
 
-  // Gesture State
   const handleDragUpdate = (
     x: number,
     y: number,
@@ -208,7 +166,6 @@ export function CalendarGrid({ width }: { width: number }) {
     if (state === 'start') {
       isDragging.current = true;
       dragStartDate.current = date;
-      // Initial vibration
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setSelectedRange({ start: date, end: date });
     } else if (
@@ -216,12 +173,30 @@ export function CalendarGrid({ width }: { width: number }) {
       isDragging.current &&
       dragStartDate.current
     ) {
-      const start = isBefore(dragStartDate.current, date)
-        ? dragStartDate.current
-        : date;
-      const end = isBefore(dragStartDate.current, date)
-        ? date
-        : dragStartDate.current;
+      // Simple range logic for now
+      // This logic in handleDragUpdate was actually correct in previous version
+      // We just need to reimplement it cleanly if we removed `isBefore` imports etc.
+      // Wait, I imported `isBefore` in my new code content above?
+      // I missed `isBefore`, `isAfter`, `isSameDay` in imports in the code block above?
+      // No, let me check imports in code block below.
+      // I included `isBefore`, `isAfter`, `isSameDay` in imports.
+      // Let's verify.
+      
+      /*
+      import {
+        getDaysInMonth,
+        startOfMonth,
+        endOfMonth,
+        getDay,
+        isSameMonth,
+        // Missing isBefore, isAfter, isSameDay?
+      } from 'date-fns';
+      */
+      
+      // I'll make sure to include them.
+      
+      const start = date < dragStartDate.current ? date : dragStartDate.current;
+      const end = date > dragStartDate.current ? date : dragStartDate.current;
       setSelectedRange({ start, end });
     }
   };
@@ -232,33 +207,24 @@ export function CalendarGrid({ width }: { width: number }) {
   const handleTap = (x: number, y: number) => {
     const date = getDateAtPoint(x, y);
     if (date) {
-      // Check if tapping inside an existing selected range
-      if (selectedRange && !isSameDay(selectedRange.start, selectedRange.end)) {
-        const isInside =
-          (isAfter(date, selectedRange.start) ||
-            isSameDay(date, selectedRange.start)) &&
-          (isBefore(date, selectedRange.end) ||
-            isSameDay(date, selectedRange.end));
+      if (selectedRange && selectedRange.start.getTime() !== selectedRange.end.getTime()) {
+         const startT = selectedRange.start.getTime();
+         const endT = selectedRange.end.getTime();
+         const dateT = date.getTime();
+         
+         if (dateT >= startT && dateT <= endT) {
+             setDetailModal(true, null, selectedRange);
+             return;
+         }
+      }
 
-        if (isInside) {
-          // If tapping inside a multi-day selection, open modal for the whole range
-          setDetailModal(true, null, selectedRange);
-          return;
-        }
+      if (onPressDay) {
+        onPressDay(date);
+        return;
       }
 
       toggleDaySelection(date);
-
-      // standard single day logic
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const dayNum = date.getDate();
-      const eventsKey = `${year}-${month}-${dayNum}`;
-      const hasEvents = (STATIC_MOCK_EVENTS[eventsKey]?.length || 0) > 0;
-
-      if (hasEvents) {
-        setDetailModal(true, date);
-      }
+      setDetailModal(true, date);
     }
   };
 
@@ -285,58 +251,45 @@ export function CalendarGrid({ width }: { width: number }) {
       runOnJS(handleTap)(e.x, e.y);
     });
 
-  const gestures = Gesture.Race(panGesture, tapGesture);
+  // Calculate visible date based on User Rules
+  const calculateVisibleDate = (y: number): Date | null => {
+      if (containerHeight.current <= 0) return null;
+      
+      const visibleStart = y;
+      const visibleEnd = y + containerHeight.current;
 
-  // Sync scroll to focusedDay
-  useEffect(() => {
-    if (!layoutReady) return;
-
-    // Only scroll if the update came from OUTSIDE (header/user), not from the grid itself.
-    if (lastUpdateSource === 'grid') return;
-    if (isYearScrolling) return;
-
-    // Calculate index of focused day
-    const diffYears = focusedDay.getFullYear() - BASE_YEAR;
-    const diffMonths = diffYears * 12 + focusedDay.getMonth();
-
-    const index = Math.max(0, Math.min(diffMonths, TOTAL_MONTHS - 1));
-    const config = monthConfigs[index];
-
-    // Flag start of programmatic scroll
-    isProgrammaticScroll.current = true;
-    if (programmaticScrollTimeout.current)
-      clearTimeout(programmaticScrollTimeout.current);
-
-    // Safety reset after 1s (in case scroll end doesn't fire or fails)
-    programmaticScrollTimeout.current = setTimeout(() => {
-      isProgrammaticScroll.current = false;
-    }, 1000);
-
-    flatListRef.current?.scrollToOffset({
-      offset: config.offset,
-      animated: true,
-    });
-  }, [focusedDay, layoutReady, lastUpdateSource, isYearScrolling]); // Ensure all deps are listed
-
-  // Viewability Config to update controller on scroll
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      // Ignore updates during programmatic smoothing
-      if (isProgrammaticScroll.current) return;
-
-      if (viewableItems.length > 0) {
-        const first = viewableItems[0];
-        const index = first.index;
-        if (index !== null) {
-          const config = monthConfigs[index];
-          if (config) {
-            // Defer update: just track what is currently visible
-            pendingFocusedDay.current = config.date;
+      // Rule 1 & 2: Find months where "1st" (offset) is visible
+      // visibleStart <= offset <= visibleEnd
+      // We want the TOP-most 1st, i.e., smallest offset.
+      
+      // Optimization: Bisect or find efficiently? Since array is sorted by offset.
+      // Filter is O(N) but N=2400 is small enough for simple find/loop or we can find index.
+      // Let's iterate.
+      
+      // Potential candidate with 1st visible
+      let firstDayVisibleCandidate: MonthConfig | null = null;
+      
+      for (const config of monthConfigs) {
+          // If config started after viewport, and we already found a candidate (which would be earlier), break?
+          // No, we want smallest offset. Array is sorted.
+          // So the first one we find matching the condition IS the top-most.
+          
+          if (config.offset >= visibleStart && config.offset < visibleEnd) {
+             firstDayVisibleCandidate = config;
+             break;
           }
-        }
+          
+          if (config.offset >= visibleEnd) break;
       }
-    }
-  ).current;
+      
+      if (firstDayVisibleCandidate) return firstDayVisibleCandidate.date;
+      
+      // Rule 3: No 1st visible. Find month covering top (visibleStart).
+      const coveringCandidate = monthConfigs.find(c => c.offset <= visibleStart && c.offset + c.height > visibleStart);
+      if (coveringCandidate) return coveringCandidate.date;
+
+      return null;
+  };
 
   const handleScrollFinish = () => {
     const wasProgrammatic = isProgrammaticScroll.current;
@@ -349,125 +302,87 @@ export function CalendarGrid({ width }: { width: number }) {
       return;
     }
 
-    if (
-      pendingFocusedDay.current &&
-      !isSameMonth(pendingFocusedDay.current, focusedDayRef.current)
-    ) {
-      setFocusedDay(pendingFocusedDay.current, 'grid');
-      pendingFocusedDay.current = null;
+    // Use current scrollY value
+    const currentY = scrollY.value;
+    const newDate = calculateVisibleDate(currentY);
+
+    if (newDate && !isSameMonth(newDate, focusedDayRef.current)) {
+       if (onFocusedDayChange) {
+          onFocusedDayChange(newDate);
+       } else {
+          setFocusedDay(newDate, 'grid');
+       }
     }
   };
 
-  // Render Month Item
+  const gestures = Gesture.Race(panGesture, tapGesture);
+
+  useEffect(() => {
+    if (!layoutReady) return;
+
+    // Check if we need to scroll
+    // If propFocusedDay is provided, we check if it is "programmatically needed"
+    // i.e., is the user "already looking at" this month?
+    
+    // Calculate what the "Visible Month" is right now based on scrollY
+    const visibleDate = calculateVisibleDate(scrollY.value);
+    
+    // If we are already looking at the month of focusedDay (according to our logic),
+    // then WE DO NOT SCROLL. This prevents snapping.
+    if (visibleDate && isSameMonth(visibleDate, focusedDay)) {
+        return;
+    }
+
+    if (!propFocusedDay) {
+      if (lastUpdateSource === 'grid') return;
+      if (isYearScrolling) return;
+    }
+    
+    // ... Proceed to scroll
+
+
+    const diffYears = focusedDay.getFullYear() - BASE_YEAR;
+    const diffMonths = diffYears * 12 + focusedDay.getMonth();
+
+    const index = Math.max(0, Math.min(diffMonths, TOTAL_MONTHS - 1));
+    const config = monthConfigs[index];
+
+    isProgrammaticScroll.current = true;
+    if (programmaticScrollTimeout.current)
+      clearTimeout(programmaticScrollTimeout.current);
+
+    programmaticScrollTimeout.current = setTimeout(() => {
+      isProgrammaticScroll.current = false;
+    }, 1000);
+
+    flatListRef.current?.scrollToOffset({
+      offset: config.offset,
+      animated: true,
+    });
+  }, [focusedDay, layoutReady, lastUpdateSource, isYearScrolling]);
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+       // logic moved to handleScrollFinish / calculateVisibleDate
+    }
+  ).current;
+
+
+
+  // Render Month Item using extracted component
   const renderItem = ({ item }: { item: MonthConfig }) => {
     return (
-      <View
-        style={{
-          height: item.height,
-          width: width,
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          overflow: 'hidden',
-        }}
-        testID="CalendarGrid-MonthItem"
-      >
-        {/* We Render Grid of Cells */}
-        {/* Empty Cells */}
-        {Array.from({ length: item.startOffset }).map((_, i) => (
-          <CalendarCell
-            key={`empty-${i}`}
-            day={null}
-            date={item.date}
-            cellWidth={CELL_WIDTH}
-          />
-        ))}
-
-        {/* Days */}
-        {Array.from({ length: item.daysInMonth }).map((_, i) => {
-          const dayNum = i + 1;
-          const date = new Date(
-            item.date.getFullYear(),
-            item.date.getMonth(),
-            dayNum
-          );
-          const year = date.getFullYear();
-          const month = date.getMonth();
-
-          const eventsKey = `${year}-${month}-${dayNum}`;
-          const events = STATIC_MOCK_EVENTS[eventsKey] || EMPTY_EVENTS;
-          // Continuing Events (Mock) - Use static reference
-          const continuingIds = STATIC_CONTINUING_IDS[eventsKey] || EMPTY_SET;
-
-          // Check selection locally
-          let isSelected = false;
-          let isStart = false;
-          let isEnd = false;
-
-          if (selectedRange) {
-            const { start, end } = selectedRange;
-            isStart = isSameDay(date, start);
-            isEnd = isSameDay(date, end);
-            isSelected =
-              (isAfter(date, start) || isStart) &&
-              (isBefore(date, end) || isEnd);
-          }
-
-          return (
-            <CalendarCell
-              key={`day-${dayNum}`}
-              day={dayNum}
-              date={date}
-              isToday={isSameDay(date, new Date())}
-              isSelected={isSelected}
-              isRangeStart={isStart}
-              isRangeEnd={isEnd}
-              events={events}
-              continuingEventIds={continuingIds}
-              cellWidth={CELL_WIDTH}
-            />
-          );
-        })}
-
-        {/* Remaining empty space is handled by the container height constraint automatically? 
-            FlexWrap wraps. We calculated height based on rows.
-            The remaining space in the last row will be empty.
-            But we need borders for them?
-            Flutter renders 'null' cells for them if I recall correctly?
-            Actually "if (dayNum < 1 || dayNum > daysInMonth) return null cell".
-            But we loop only valid days.
-            We should fill the rest of the grid if we want borders.
-            The `effectiveRows * 7` is the total cells.
-        */}
-        {Array.from({
-          length:
-            Math.ceil((item.startOffset + item.daysInMonth) / 7) * 7 -
-            (item.startOffset + item.daysInMonth),
-        }).map((_, i) => (
-          <CalendarCell
-            key={`trail-${i}`}
-            day={null}
-            date={item.date}
-            cellWidth={CELL_WIDTH}
-          />
-        ))}
-        {/* Special Case: Gap Row (7 cells) */}
-        {item.rows * 7 >
-          Math.ceil((item.startOffset + item.daysInMonth) / 7) * 7 &&
-          Array.from({ length: 7 }).map((_, i) => (
-            <CalendarCell
-              key={`gap-${i}`}
-              day={null}
-              date={item.date}
-              cellWidth={CELL_WIDTH}
-            />
-          ))}
-      </View>
+      <MonthItem 
+          item={item} 
+          width={width} 
+          CELL_WIDTH={CELL_WIDTH} 
+          selectedRange={selectedRange}
+      />
     );
   };
 
   return (
     <View style={{ flex: 1 }} testID="CalendarGrid">
-      {/* Weekday Header */}
       <View style={styles.weekdayHeader} testID="CalendarGrid-WeekHeader">
         {WEEKDAYS.map((day) => (
           <View
@@ -492,10 +407,14 @@ export function CalendarGrid({ width }: { width: number }) {
             offset: monthConfigs[index].offset,
             index,
           })}
-          onLayout={() => setLayoutReady(true)}
-          initialNumToRender={2}
-          windowSize={3}
-          maxToRenderPerBatch={2}
+          onLayout={(e) => {
+              setLayoutReady(true);
+              containerHeight.current = e.nativeEvent.layout.height;
+          }}
+          initialScrollIndex={Math.max(0, Math.min((focusedDay.getFullYear() - BASE_YEAR) * 12 + focusedDay.getMonth(), TOTAL_MONTHS - 1))}
+          initialNumToRender={1}
+          windowSize={2} // Very tight window to prevent over-fetching
+          maxToRenderPerBatch={1}
           removeClippedSubviews={true}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={VIEWABILITY_CONFIG}
@@ -503,11 +422,11 @@ export function CalendarGrid({ width }: { width: number }) {
           scrollEventThrottle={16}
           onScrollBeginDrag={() => {
             isProgrammaticScroll.current = false;
+            // Clear timeout if dragging starts
             if (programmaticScrollTimeout.current)
               clearTimeout(programmaticScrollTimeout.current);
           }}
           onScrollEndDrag={(e) => {
-            // Only update if no momentum (user dragged slowly and stopped)
             if (e.nativeEvent.velocity?.y === 0) {
               handleScrollFinish();
             }
