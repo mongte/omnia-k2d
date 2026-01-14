@@ -22,6 +22,7 @@ interface CalendarCellProps {
   continuingEventIds?: Set<string>;
   onLongPress?: () => void;
   cellWidth: number;
+  isFocused?: boolean;
 }
 
 // Memoized to prevent re-renders on every scroll/drag update
@@ -37,6 +38,7 @@ export const CalendarCell = React.memo(
     continuingEventIds = new Set(),
     onLongPress,
     cellWidth,
+    isFocused = false,
   }: CalendarCellProps) => {
     // const colorScheme = useColorScheme();
     const theme = Colors.light;
@@ -69,7 +71,7 @@ export const CalendarCell = React.memo(
           {
             width: cellWidth,
             height: cellWidth * 1.3,
-            borderColor: theme.grid,
+            borderColor: isFocused ? '#E0E0E0' : theme.grid,
             borderRightWidth: 1,
             borderBottomWidth: 1,
             backgroundColor: theme.background,
@@ -146,6 +148,8 @@ export const CalendarCell = React.memo(
     const isDateEqual = prev.date.getTime() === next.date.getTime();
     const isEventsEqual = prev.events === next.events;
     const isIdsEqual = prev.continuingEventIds === next.continuingEventIds;
+    // Add isFocused check
+    const isFocusedEqual = prev.isFocused === next.isFocused;
 
     return (
       prev.day === next.day &&
@@ -156,7 +160,8 @@ export const CalendarCell = React.memo(
       prev.cellWidth === next.cellWidth &&
       isDateEqual &&
       isEventsEqual &&
-      isIdsEqual
+      isIdsEqual &&
+      isFocusedEqual
     );
   }
 );

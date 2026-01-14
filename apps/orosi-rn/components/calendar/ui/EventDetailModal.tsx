@@ -10,8 +10,6 @@ import { format, isSameDay } from 'date-fns';
 import { useCalendarStore } from '../model/useCalendarStore';
 import { useCalendarQueries } from '../model/useCalendarQueries';
 import { BlurView } from 'expo-blur';
-import { MaterialIcons } from '@expo/vector-icons';
-import Svg, { Path, Line } from 'react-native-svg';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -24,31 +22,14 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EventDetailView } from './EventDetailView';
+import Colors from '@/constants/Colors';
 
 import { CalendarEventDisplayInfo } from '../model/calendarTypes';
+import { ConnectorArrow } from '@/components/ui/icons/ConnectorArrow';
 
 interface EventDotStyle {
   backgroundColor: string;
   marginLeft: number;
-}
-
-const ConnectorArrow = ({ direction, color }: { direction: 'up' | 'down', color: string }) => {
-    const strokeWidth = 2.5;
-    if (direction === 'up') {
-      return (
-        <Svg width={14} height={20} viewBox="0 0 14 20" style={{ marginBottom: -2 }}>
-           <Line x1="7" y1="20" x2="7" y2="2" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
-           <Path d="M 3 6 L 7 2 L 11 6" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
-        </Svg>
-      );
-    } else {
-       return (
-        <Svg width={14} height={20} viewBox="0 0 14 20" style={{ marginTop: -2 }}>
-           <Line x1="7" y1="0" x2="7" y2="18" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
-           <Path d="M 3 14 L 7 18 L 11 14" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" fill="none" />
-        </Svg>
-      );
-    }
 }
 
 export const EventDetailModal = () => {
@@ -263,33 +244,33 @@ export const EventDetailModal = () => {
 
                           return (
                               <View key={`${event.id}_${index}`} style={[styles.timelineItem, isLeft ? styles.leftItem : styles.rightItem]}>
-                                  {/* Connector & Dot */}
-                                  <View style={[styles.connectorContainer]}>
-                                      <View style={[
-                                          styles.connectorLine, 
-                                          isLeft ? { right: '50%', marginRight: 5 } : { left: '50%', marginLeft: 5 }
-                                      ]} />
-                                      
-                                      {(isContinuing || isRangeEnd) && (
-                                        <View style={{
-                                            position: 'absolute',
-                                            top: -20, 
-                                            left: '50%',
-                                            marginLeft: (dotStyle.marginLeft as number) - 1, 
-                                        }}>
-                                           <ConnectorArrow direction="up" color={event.color} />
-                                        </View>
-                                      )}
-                                      {(isContinuing || isRangeStart) && (
-                                        <View style={{
-                                            position: 'absolute',
-                                            top: 12, 
-                                            left: '50%',
-                                            marginLeft: (dotStyle.marginLeft as number) - 1,
-                                        }}>
-                                            <ConnectorArrow direction="down" color={event.color} />
-                                        </View>
-                                      )}
+                                      {/* Connector & Dot */}
+                                      <View style={[styles.connectorContainer]}>
+                                          <View style={[
+                                              styles.connectorLine, 
+                                              isLeft ? { right: '50%', marginRight: 5 } : { left: '50%', marginLeft: 5 }
+                                          ]} />
+                                          
+                                          {!isRangeStart && (
+                                            <View style={{
+                                                position: 'absolute',
+                                                top: -20, 
+                                                left: '50%',
+                                                marginLeft: (dotStyle.marginLeft as number) - 1, 
+                                            }}>
+                                               <ConnectorArrow direction="up" color={event.color} />
+                                            </View>
+                                          )}
+                                          {!isRangeEnd && (
+                                            <View style={{
+                                                position: 'absolute',
+                                                top: 12, 
+                                                left: '50%',
+                                                marginLeft: (dotStyle.marginLeft as number) - 1,
+                                            }}>
+                                                <ConnectorArrow direction="down" color={event.color} />
+                                            </View>
+                                          )}
 
                                       <View style={[styles.dot, dotStyle]} />
                                   </View>
@@ -351,7 +332,47 @@ export const EventDetailModal = () => {
                         </ScrollView>
 
                         <View style={styles.footer}>
-                          <TouchableOpacity style={styles.addButton}>
+                          <TouchableOpacity 
+                            style={styles.addButton}
+                            onPress={() => {
+                                const start = displayDate ? new Date(displayDate) : new Date();
+                                // Default to next hour if it's "now", or just use the date if it's a specific day?
+                                // If displayDate is "today" (from date state), maybe set time to next hour.
+                                // But displayDate is usually 00:00 if coming from grid selection?
+                                // Let's set it to current time if isSameDay(displayDate, new Date()), else 9am.
+                                
+                                const Now = new Date();
+                                if (isSameDay(start, Now)) {
+                                    start.setHours(Now.getHours() + 1, 0, 0, 0);
+                                } else {
+                                    start.setHours(9, 0, 0, 0);
+                                }
+                                
+                                const end = new Date(start);
+                                
+                                // Reset end date if a multi-day range is selected
+                                if (range && !isSameDay(range.start, range.end)) {
+                                    end.setFullYear(range.end.getFullYear(), range.end.getMonth(), range.end.getDate());
+                                }
+                                
+                                end.setHours(start.getHours() + 1);
+
+                                const randomColor = Colors.getRandomEventColor();
+
+                                const newEvent: CalendarEventDisplayInfo = {
+                                    id: '', // Empty ID signals new event
+                                    title: '',
+                                    startTime: start,
+                                    endTime: end,
+                                    color: randomColor,
+                                    isMultiDay: false,
+                                    isRangeStart: true,
+                                    isRangeEnd: true,
+                                    isContinuing: false,
+                                };
+                                setSelectedEvent(newEvent);
+                            }}
+                          >
                             <Text style={styles.addButtonText}>+ Add New Event</Text>
                           </TouchableOpacity>
                         </View>

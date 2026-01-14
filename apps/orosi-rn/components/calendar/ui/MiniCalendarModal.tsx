@@ -25,8 +25,9 @@ export function MiniCalendarModal({ visible, onClose, onDateSelect, initialDate 
   const [selectedDate, setSelectedDate] = useState(initialDate || new Date());
   
   const { width } = Dimensions.get('window');
-  // Use a slightly smaller width for the modal content
-  const contentWidth = width - 48; // padding
+  // Use a smaller width for the modal content (e.g., 70% of screen)
+  const contentWidth = width * 0.7;
+  const contentHeight = contentWidth; // Square ratio
   
   // Update local states when modal becomes visible or initialDate changes
   React.useEffect(() => {
@@ -105,7 +106,7 @@ export function MiniCalendarModal({ visible, onClose, onDateSelect, initialDate 
                    </View>
               </View>
 
-              <View style={{ height: 350, width: contentWidth }}>
+              <View style={{ height: contentHeight, width: contentWidth }}>
                   <CalendarGrid 
                       width={contentWidth} 
                       focusedDay={focusedDay}
@@ -116,6 +117,7 @@ export function MiniCalendarModal({ visible, onClose, onDateSelect, initialDate 
                       }}
                       onFocusedDayChange={setFocusedDay}
                       selectedRange={{ start: selectedDate, end: selectedDate }}
+                      showEvents={false}
                   />
               </View>
           </View>

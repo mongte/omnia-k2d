@@ -10,6 +10,7 @@ import { useCalendarStore } from './model/useCalendarStore';
 import { GradientSelector } from './ui/GradientSelector';
 import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import { TodayIcon } from '../ui/icons/CalendarIcons';
 import Animated, {
   useAnimatedStyle,
   interpolate,
@@ -156,8 +157,7 @@ export function CalendarHeader({
             style={styles.todayButton}
             onPress={() => setFocusedDay(new Date())}
           >
-            <Ionicons
-              name="calendar"
+            <TodayIcon
               size={18}
               color={Colors.AppColors.primary}
             />

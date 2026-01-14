@@ -7,6 +7,8 @@ import { useCalendarQueries } from '../model/useCalendarQueries';
 import { format, set } from 'date-fns';
 import { MiniCalendarModal } from './MiniCalendarModal';
 import { TimePickerModal } from './TimePickerModal';
+import { supabase } from '@/lib/supabase';
+import { usePreventDoubleTap } from '@/hooks/usePreventDoubleTap';
 
 interface EventDetailViewProps {
   event: CalendarEventDisplayInfo;
@@ -25,29 +27,37 @@ export const EventDetailView = ({ event, onBack }: EventDetailViewProps) => {
   const [title, setTitle] = useState(event.title);
   const [description, setDescription] = useState('');
   
-  const { mutate: updateEvent } = useCalendarQueries().useUpdateEvent();
+  const { mutateAsync: createEvent } = useCalendarQueries().useCreateEvent();
+  const { mutateAsync: updateEvent } = useCalendarQueries().useUpdateEvent();
   const { mutateAsync: createSubtask } = useCalendarQueries().useCreateSubtask();
   const { mutateAsync: updateSubtask } = useCalendarQueries().useUpdateSubtask();
-  const { mutateAsync: deleteSubtask } = useCalendarQueries().useDeleteSubtask();
-  
-  // Fetch full details (description, subtasks, priority)
-  const { data: fullEvent, isLoading, error } = useCalendarQueries().useEventDetail(event.id);
 
-  // Initialize state with props where possible, others wait for fullEvent
+  const { mutateAsync: deleteSubtask } = useCalendarQueries().useDeleteSubtask();
+  const { mutateAsync: deleteEvent } = useCalendarQueries().useDeleteEvent();
+  
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+        setCurrentUser(user);
+    });
+  }, []);
+  
+  // Fetch full details only if ID exists
+  const { data: fullEvent, isLoading, error } = useCalendarQueries().useEventDetail(event.id || null);
+
   const [subtitle, setSubtitle] = useState('');
   const [priority, setPriority] = useState<string>(EventPriority.MEDIUM);
-  // Safer initialization: Handle both Date and string types
   const [startTime, setStartTime] = useState(new Date(event.startTime).toISOString());
   const [endTime, setEndTime] = useState(new Date(event.endTime).toISOString());
   const [subtasks, setSubtasks] = useState<any[]>([]);
 
-  // Merge basic info (from props) with full details (from DB)
-  // If loading, fall back to basic info.
+  // Merge basic info (from props) with full details
   const displayEvent = {
       ...event,
       description: fullEvent?.description || '',
-      priority: fullEvent?.priority || EventPriority.MEDIUM, // Default
-      subtitle: fullEvent?.subtitle || '', // Default
+      priority: fullEvent?.priority || EventPriority.MEDIUM, 
+      subtitle: fullEvent?.subtitle || '',
       subtasks: fullEvent?.subtasks || [],
   };
 
@@ -57,67 +67,117 @@ export const EventDetailView = ({ event, onBack }: EventDetailViewProps) => {
       setSubtitle(fullEvent.subtitle || '');
       setPriority(fullEvent.priority || EventPriority.MEDIUM);
       setSubtasks(fullEvent.subtasks || []);
-      // If we wanted to sync time from DB instead of props (usually same):
-      // setStartTime(fullEvent.start_time);
-      // setEndTime(fullEvent.end_time);
       setIsAllDay(fullEvent.is_all_day || false);
     }
   }, [fullEvent]);
 
-  const handleSave = async () => {
+  const handleSave = usePreventDoubleTap(async () => {
     if (!title.trim()) {
        Alert.alert('Error', 'Title cannot be empty');
        return;
     }
 
     try {
-      // 1. Update Main Event
-      updateEvent({
-        id: event.id,
-        title: title,
-        description: description,
-        subtitle: subtitle,
-        priority: priority as EventPriority,
-        start_time: startTime,
-        end_time: endTime,
-        is_all_day: isAllDay,
-        updated_at: new Date().toISOString(),
-      });
+      // Get current user for new events
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      let targetEventId = event.id;
 
-      // 2. Handle Subtasks
-      // Identify deleted
-      const originalIds = fullEvent?.subtasks?.map(t => t.id) || [];
-      const currentIds = subtasks.filter(t => !t.isNew).map(t => t.id);
-      const toDelete = originalIds.filter(id => !currentIds.includes(id));
+      if (!targetEventId) {
+          if (!user) {
+              Alert.alert('Error', 'You must be logged in to create events');
+              return;
+          }
+
+          // --- CREATE NEW EVENT ---
+          const { id } = await createEvent({
+            title: title,
+            description: description,
+            subtitle: subtitle,
+            priority: priority as EventPriority,
+            start_time: startTime,
+            end_time: endTime,
+            is_all_day: isAllDay,
+            color: event.color,
+            user_id: user.id,
+          });
+          targetEventId = id;
+      } else {
+          // --- UPDATE EXISTING EVENT ---
+          await updateEvent({
+            id: targetEventId,
+            title: title,
+            description: description,
+            subtitle: subtitle,
+            priority: priority as EventPriority,
+            start_time: startTime,
+            end_time: endTime,
+            is_all_day: isAllDay,
+            updated_at: new Date().toISOString(),
+          });
+      }
+
+      // --- HANDLE SUBTASKS ---
+      const originalIds = fullEvent?.subtasks?.map((t: any) => t.id) || [];
+      const currentIds = subtasks.filter(t => !t.isNew && t.id).map(t => t.id);
+      const toDelete = originalIds.filter((id: string) => !currentIds.includes(id));
       
       // Execute Deletes
-      await Promise.all(toDelete.map(id => deleteSubtask(id)));
+      await Promise.all(toDelete.map((id: string) => deleteSubtask(id)));
 
       // Execute Updates/Creates
       await Promise.all(subtasks.map(task => {
-        if (task.isNew) {
+        if (task.isNew || !task.id) {
            return createSubtask({
-             event_id: event.id,
+             event_id: targetEventId,
              title: task.title,
              is_completed: task.is_completed,
-             order_index: 0, // simple ordering
+             order_index: 0,
            });
         } else {
            return updateSubtask({
              id: task.id,
              title: task.title,
              is_completed: task.is_completed,
-             // Not updating order yet
            });
         }
       }));
 
       setActiveSection(null);
-      // Alert.alert('Success', 'Event updated successfully');
+      
+      // Close only on creation success
+      if (!event.id) {
+          onBack();
+      }
     } catch (e: any) {
       Alert.alert('Error', e.message);
     }
+  });
+
+  const handleDelete = async () => {
+      Alert.alert(
+          'Delete Event',
+          'Are you sure you want to delete this event?',
+          [
+              { text: 'Cancel', style: 'cancel' },
+              { 
+                  text: 'Delete', 
+                  style: 'destructive',
+                  onPress: async () => {
+                      try {
+                          if (event.id) {
+                              await deleteEvent(event.id);
+                              onBack();
+                          }
+                      } catch (e: any) {
+                          Alert.alert('Error', e.message);
+                      }
+                  }
+              }
+          ]
+      );
   };
+
 
   // const startEditing = () => ... removed
   // const cancelEditing = () => ... removed
@@ -135,6 +195,11 @@ export const EventDetailView = ({ event, onBack }: EventDetailViewProps) => {
           <MaterialIcons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <View style={styles.headerActions}>
+            {currentUser && fullEvent && currentUser.id === fullEvent.user_id && (
+                <TouchableOpacity style={styles.iconButton} onPress={handleDelete}>
+                    <MaterialIcons name="delete-outline" size={24} color="#ef4444" />
+                </TouchableOpacity>
+            )}
         </View>
       </View>
 

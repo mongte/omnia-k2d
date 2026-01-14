@@ -26,34 +26,35 @@ const fetchMonthEvents = async (date: Date) => {
 
 // Fetch Event Detail (With Subtasks)
 const fetchEventDetail = async (eventId: string) => {
-  const { data: event, error: eventError } = await supabase
-    .from('events')
-    .select('*')
-    .eq('id', eventId)
-    .single();
+  const [eventResult, subtasksResult] = await Promise.all([
+    supabase
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single(),
+    supabase
+      .from('event_subtasks')
+      .select('*')
+      .eq('event_id', eventId)
+      .order('order_index', { ascending: true })
+  ]);
 
-  if (eventError) throw eventError;
+  if (eventResult.error) throw eventResult.error;
+  if (subtasksResult.error) throw subtasksResult.error;
 
-  const { data: subtasks, error: subtasksError } = await supabase
-    .from('event_subtasks')
-    .select('*')
-    .eq('event_id', eventId)
-    .order('order_index', { ascending: true });
-
-    if (subtasksError) throw subtasksError;
-
-  return { ...event, subtasks: subtasks || [] };
+  return { ...eventResult.data, subtasks: subtasksResult.data || [] };
 };
 
 export const useCalendarQueries = () => {
   const queryClient = useQueryClient();
 
   // Query: Month Events
-  const useMonthEvents = (date: Date) => {
+  const useMonthEvents = (date: Date, options?: { enabled?: boolean }) => {
     return useQuery({
       queryKey: ['events', format(date, 'yyyy-MM')],
       queryFn: () => fetchMonthEvents(date),
       staleTime: 1000 * 60 * 5, // 5 minutes fresh
+      enabled: options?.enabled ?? true,
     });
   };
 
@@ -165,5 +166,20 @@ export const useCalendarQueries = () => {
     useCreateSubtask,
     useUpdateSubtask,
     useDeleteSubtask,
+    useDeleteEvent,
   };
+};
+
+// Mutation: Delete Event
+const useDeleteEvent = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (eventId: string) => {
+            const { error } = await supabase.from('events').delete().eq('id', eventId);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+        },
+    });
 };

@@ -42,9 +42,10 @@ interface CalendarGridProps {
   onPressDay?: (date: Date) => void;
   onFocusedDayChange?: (date: Date) => void;
   selectedRange?: { start: Date; end: Date } | null;
+  showEvents?: boolean;
 }
 
-export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, onFocusedDayChange, selectedRange: propSelectedRange }: CalendarGridProps) {
+export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, onFocusedDayChange, selectedRange: propSelectedRange, showEvents = true }: CalendarGridProps) {
   const flatListRef = useRef<FlatList>(null);
   const [layoutReady, setLayoutReady] = useState(false);
   const containerHeight = useRef(0);
@@ -377,6 +378,8 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
           width={width} 
           CELL_WIDTH={CELL_WIDTH} 
           selectedRange={selectedRange}
+          showEvents={showEvents}
+          isFocused={isSameMonth(item.date, focusedDay)}
       />
     );
   };

@@ -3,24 +3,25 @@ import { View } from 'react-native';
 import { MonthConfig, CalendarEvent } from '../model/calendarTypes';
 import { CalendarCell } from '../CalendarCell';
 import { useCalendarQueries } from '../model/useCalendarQueries';
-import { useCalendarStore } from '../model/useCalendarStore';
-import { isSameDay, isAfter, isBefore } from 'date-fns';
+import { isSameDay, isAfter, isBefore, endOfMonth } from 'date-fns';
 
 interface MonthItemProps {
   item: MonthConfig;
   width: number;
   CELL_WIDTH: number;
   selectedRange?: { start: Date; end: Date } | null;
+  showEvents?: boolean;
+  isFocused?: boolean;
 }
 
-export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange: propSelectedRange }: MonthItemProps) => {
+export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange, showEvents = true, isFocused = false }: MonthItemProps) => {
   // Fetch events via React Query
-  const { data: eventsData } = useCalendarQueries().useMonthEvents(item.date);
-  const storeSelectedRange = useCalendarStore((state) => state.selectedRange);
-  const selectedRange = propSelectedRange !== undefined ? propSelectedRange : storeSelectedRange;
+  const { data: eventsData } = useCalendarQueries().useMonthEvents(item.date, { enabled: showEvents });
 
   // Group events by date for rendering O(N)
   const eventsByDay = useMemo(() => {
+    if (!showEvents) return {}; 
+    
     const map: Record<number, any[]> = {}; // Using any[] to match CalendarCell expectation temporarily, or ideally mapped structure
     if (!eventsData) return map;
 
@@ -112,7 +113,7 @@ export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange: p
 
         const events = eventsByDay[dayNum] || [];
         // TODO: Handle continuing events properly with new logic if needed
-        const continuingIds = new Set<string>(); // Temporary empty until logic ported
+        const continuingEventIds = new Set<string>(); // Temporary empty until logic ported
 
         // Check selection locally
         let isSelected = false;
@@ -138,8 +139,9 @@ export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange: p
             isRangeStart={isStart}
             isRangeEnd={isEnd}
             events={events}
-            continuingEventIds={continuingIds}
+            continuingEventIds={continuingEventIds}
             cellWidth={CELL_WIDTH}
+            isFocused={isFocused}
           />
         );
       })}
@@ -171,4 +173,37 @@ export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange: p
         ))}
     </View>
   );
+}, (prev, next) => {
+  // 1. Basic Props Check
+  if (prev.width !== next.width || prev.CELL_WIDTH !== next.CELL_WIDTH || prev.item !== next.item || prev.showEvents !== next.showEvents || prev.isFocused !== next.isFocused) {
+    return false;
+  }
+
+  // 2. Reference Check for Range
+  if (prev.selectedRange === next.selectedRange) {
+    return true;
+  }
+
+  // 3. Smart Intersection Check
+  // If neither range touches this month, we don't need to re-render.
+  const monthStart = prev.item.date;
+  const monthEnd = endOfMonth(monthStart);
+
+  const doesRangeIntersectMonth = (range: { start: Date; end: Date } | null | undefined) => {
+    if (!range) return false;
+    // Range: [start, end]
+    // Month: [monthStart, monthEnd]
+    // Intersects if: start <= monthEnd AND end >= monthStart
+    return range.start <= monthEnd && range.end >= monthStart;
+  };
+
+  const prevIntersects = doesRangeIntersectMonth(prev.selectedRange);
+  const nextIntersects = doesRangeIntersectMonth(next.selectedRange);
+
+  // Optimization: If both are irrelevant to this month, skip render
+  if (!prevIntersects && !nextIntersects) {
+    return true;
+  }
+
+  return false;
 });
