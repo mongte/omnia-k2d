@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, ActivityIndicator, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { usePreventDoubleTap } from '@/hooks/usePreventDoubleTap';
+import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
+import { format, set } from 'date-fns';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { CalendarEventDisplayInfo, EventPriority } from '../model/calendarTypes';
 import { useCalendarQueries } from '../model/useCalendarQueries';
-import { format, set } from 'date-fns';
 import { MiniCalendarModal } from './MiniCalendarModal';
 import { TimePickerModal } from './TimePickerModal';
-import { supabase } from '@/lib/supabase';
-import { usePreventDoubleTap } from '@/hooks/usePreventDoubleTap';
 
 interface EventDetailViewProps {
   event: CalendarEventDisplayInfo;

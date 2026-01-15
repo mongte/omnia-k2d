@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { View, StyleSheet, Modal, TouchableOpacity, Text, Dimensions, TextInput } from 'react-native';
-import { GradientSelector } from './GradientSelector';
 import Colors from '@/constants/Colors';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Dimensions, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GradientSelector } from './GradientSelector';
 
 interface TimePickerModalProps {
   visible: boolean;

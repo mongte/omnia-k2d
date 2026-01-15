@@ -1,23 +1,16 @@
-import React, { useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-} from 'react-native';
-import { useCalendarStore } from './model/useCalendarStore';
-import { GradientSelector } from './ui/GradientSelector';
 import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import { format, isSameMonth } from 'date-fns';
+import React, { useMemo } from 'react';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { TodayIcon } from '../ui/icons/CalendarIcons';
-import Animated, {
-  useAnimatedStyle,
-  interpolate,
-  Extrapolation,
-} from 'react-native-reanimated';
-import { addMonths, addYears, format, isSameMonth } from 'date-fns';
-import { UpdateSource } from './model/calendarTypes';
+import { useCalendarStore } from './model/useCalendarStore';
+import { GradientSelector } from './ui/GradientSelector';
 
 interface CalendarHeaderProps {
   onOpenDrawer: () => void;

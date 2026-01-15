@@ -1,31 +1,31 @@
+import Colors from '@/constants/Colors';
+import { format, isSameDay } from 'date-fns';
+import { BlurView } from 'expo-blur';
 import React, { useMemo, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { format, isSameDay } from 'date-fns';
-import { useCalendarStore } from '../model/useCalendarStore';
-import { useCalendarQueries } from '../model/useCalendarQueries';
-import { BlurView } from 'expo-blur';
 import Animated, {
   FadeIn,
   FadeOut,
-  SlideInRight,
-  SlideOutRight,
   SlideInLeft,
+  SlideInRight,
   SlideOutLeft,
+  SlideOutRight,
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCalendarQueries } from '../model/useCalendarQueries';
+import { useCalendarStore } from '../model/useCalendarStore';
 import { EventDetailView } from './EventDetailView';
-import Colors from '@/constants/Colors';
 
-import { CalendarEventDisplayInfo } from '../model/calendarTypes';
 import { ConnectorArrow } from '@/components/ui/icons/ConnectorArrow';
+import { CalendarEventDisplayInfo } from '../model/calendarTypes';
 
 interface EventDotStyle {
   backgroundColor: string;

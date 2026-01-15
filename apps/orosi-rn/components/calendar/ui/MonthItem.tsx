@@ -1,9 +1,9 @@
+import { endOfMonth, isAfter, isBefore, isSameDay } from 'date-fns';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
-import { MonthConfig, CalendarEvent } from '../model/calendarTypes';
 import { CalendarCell } from '../CalendarCell';
+import { MonthConfig } from '../model/calendarTypes';
 import { useCalendarQueries } from '../model/useCalendarQueries';
-import { isSameDay, isAfter, isBefore, endOfMonth } from 'date-fns';
 
 interface MonthItemProps {
   item: MonthConfig;
@@ -93,14 +93,26 @@ export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange, s
       testID="CalendarGrid-MonthItem"
     >
       {/* Empty Cells */}
-      {Array.from({ length: item.startOffset }).map((_, i) => (
-        <CalendarCell
-          key={`empty-${i}`}
-          day={null}
-          date={item.date}
-          cellWidth={CELL_WIDTH}
-        />
-      ))}
+      {Array.from({ length: item.startOffset }).map((_, i) => {
+        const gridIndex = i;
+        const colIndex = gridIndex % 7;
+        const isLastColumn = colIndex === 6;
+        
+        // Check if the cell directly below has a valid day
+        const belowIndex = gridIndex + 7;
+        const hasDayBelow = belowIndex >= item.startOffset && belowIndex < item.startOffset + item.daysInMonth;
+
+        return (
+          <CalendarCell
+            key={`empty-${i}`}
+            day={null}
+            date={item.date}
+            cellWidth={CELL_WIDTH}
+            isLastColumn={isLastColumn}
+            showBottomBorder={hasDayBelow}
+          />
+        );
+      })}
 
       {/* Days */}
       {Array.from({ length: item.daysInMonth }).map((_, i) => {
@@ -129,6 +141,14 @@ export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange, s
             (isBefore(date, end) || isEnd);
         }
 
+        const gridIndex = item.startOffset + i;
+        const colIndex = gridIndex % 7;
+        const isLastColumn = colIndex === 6 || dayNum === item.daysInMonth;
+        
+        // Check if the cell directly below has a valid day
+        const belowIndex = gridIndex + 7;
+        const hasDayBelow = belowIndex >= item.startOffset && belowIndex < item.startOffset + item.daysInMonth;
+
         return (
           <CalendarCell
             key={`day-${dayNum}`}
@@ -142,6 +162,8 @@ export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange, s
             continuingEventIds={continuingEventIds}
             cellWidth={CELL_WIDTH}
             isFocused={isFocused}
+            isLastColumn={isLastColumn}
+            showBottomBorder={hasDayBelow}
           />
         );
       })}
@@ -151,26 +173,47 @@ export const MonthItem = React.memo(({ item, width, CELL_WIDTH, selectedRange, s
         length:
           Math.ceil((item.startOffset + item.daysInMonth) / 7) * 7 -
           (item.startOffset + item.daysInMonth),
-      }).map((_, i) => (
-        <CalendarCell
-          key={`trail-${i}`}
-          day={null}
-          date={item.date}
-          cellWidth={CELL_WIDTH}
-        />
-      ))}
+      }).map((_, i) => {
+        const gridIndex = item.startOffset + item.daysInMonth + i;
+        const colIndex = gridIndex % 7;
+        const isLastColumn = colIndex === 6;
+        
+        // Trailing cells are at the end, usually no valid day below them in this month grid context
+        // (Next month starts after, but current logic confines to this month's days)
+        const belowIndex = gridIndex + 7;
+        const hasDayBelow = belowIndex >= item.startOffset && belowIndex < item.startOffset + item.daysInMonth;
+
+        return (
+          <CalendarCell
+            key={`trail-${i}`}
+            day={null}
+            date={item.date}
+            cellWidth={CELL_WIDTH}
+            isLastColumn={isLastColumn}
+            showBottomBorder={hasDayBelow}
+          />
+        );
+      })}
       
       {/* Special Case: Gap Row */}
       {item.rows * 7 >
         Math.ceil((item.startOffset + item.daysInMonth) / 7) * 7 &&
-        Array.from({ length: 7 }).map((_, i) => (
-          <CalendarCell
-            key={`gap-${i}`}
-            day={null}
-            date={item.date}
-            cellWidth={CELL_WIDTH}
-          />
-        ))}
+        Array.from({ length: 7 }).map((_, i) => {
+           // Gap row is always the last row if it exists
+           const isLastColumn = i === 6;
+           const hasDayBelow = false; // Always bottom of grid
+
+          return (
+            <CalendarCell
+              key={`gap-${i}`}
+              day={null}
+              date={item.date}
+              cellWidth={CELL_WIDTH}
+              isLastColumn={isLastColumn}
+              showBottomBorder={hasDayBelow}
+            />
+          );
+        })}
     </View>
   );
 }, (prev, next) => {

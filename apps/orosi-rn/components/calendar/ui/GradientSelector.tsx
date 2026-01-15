@@ -1,25 +1,23 @@
-import React, { useRef, useEffect } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect } from 'react';
 import {
-  View,
-  StyleSheet,
   Dimensions,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
+  Platform,
+  StyleSheet,
+  View
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  useAnimatedScrollHandler,
-  useSharedValue,
-  useAnimatedStyle,
-  interpolate,
   Extrapolation,
   SharedValue,
+  interpolate,
+  runOnJS,
   scrollTo,
   useAnimatedRef,
-  runOnJS,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { Platform } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 

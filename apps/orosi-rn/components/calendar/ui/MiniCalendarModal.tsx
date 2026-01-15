@@ -1,11 +1,9 @@
+import { format, isSameMonth } from 'date-fns';
 import React, { useState } from 'react';
-import { View, StyleSheet, Modal, TouchableOpacity, Text, Dimensions } from 'react-native';
+import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { CalendarGrid } from '../CalendarGrid';
 import { GradientSelector } from './GradientSelector';
-import Colors from '@/constants/Colors';
-import { MaterialIcons } from '@expo/vector-icons';
-import { format, isSameMonth } from 'date-fns';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const BASE_YEAR = 2000;
 const TOTAL_YEARS = 200;

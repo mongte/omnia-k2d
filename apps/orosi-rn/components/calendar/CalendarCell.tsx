@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,13 @@ import {
 import { CalendarEvent } from './model/calendarTypes';
 import Colors from '@/constants/Colors';
 import { isSameDay, getDay } from 'date-fns';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolateColor,
+  interpolate,
+} from 'react-native-reanimated';
 
 interface CalendarCellProps {
   day: number | null;
@@ -23,6 +30,8 @@ interface CalendarCellProps {
   onLongPress?: () => void;
   cellWidth: number;
   isFocused?: boolean;
+  isLastColumn?: boolean;
+  showBottomBorder?: boolean;
 }
 
 // Memoized to prevent re-renders on every scroll/drag update
@@ -39,9 +48,36 @@ export const CalendarCell = React.memo(
     onLongPress,
     cellWidth,
     isFocused = false,
+    isLastColumn = false,
+    showBottomBorder = true,
   }: CalendarCellProps) => {
     // const colorScheme = useColorScheme();
     const theme = Colors.light;
+
+    const focusDerived = useSharedValue(isFocused ? 1 : 0);
+
+    useEffect(() => {
+        focusDerived.value = withTiming(isFocused ? 1 : 0, { duration: 150 });
+    }, [isFocused]);
+
+    const rContainerStyle = useAnimatedStyle(() => {
+        const borderColor = interpolateColor(
+            focusDerived.value,
+            [0, 1],
+            [theme.grid, '#E0E0E0']
+        );
+        return { borderColor };
+    });
+
+    const rTextStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(focusDerived.value, [0, 1], [0.2, 0.9]);
+        return { opacity };
+    });
+
+    const rDotsStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(focusDerived.value, [0, 1], [0.3, 1]);
+        return { opacity };
+    });
 
     if (day === null) {
       // Empty cell
@@ -53,8 +89,8 @@ export const CalendarCell = React.memo(
               width: cellWidth,
               height: cellWidth * 1.3,
               borderColor: theme.grid,
-              borderRightWidth: 1,
-              borderBottomWidth: 1,
+              borderRightWidth: isLastColumn ? 0 : 1,
+              borderBottomWidth: showBottomBorder ? 1 : 0,
               backgroundColor: theme.tableCellEmpty,
             },
           ]}
@@ -64,16 +100,16 @@ export const CalendarCell = React.memo(
     }
 
     return (
-      <View
+      <Animated.View
         testID={`CalendarCell-${day ? day : 'empty'}`}
         style={[
           styles.cell,
+          rContainerStyle,
           {
             width: cellWidth,
             height: cellWidth * 1.3,
-            borderColor: isFocused ? '#E0E0E0' : theme.grid,
-            borderRightWidth: 1,
-            borderBottomWidth: 1,
+            borderRightWidth: isLastColumn ? 0 : 1,
+            borderBottomWidth: showBottomBorder ? 1 : 0,
             backgroundColor: theme.background,
           },
         ]}
@@ -85,19 +121,33 @@ export const CalendarCell = React.memo(
               <Text style={styles.todayText}>{day}</Text>
             </View>
           ) : (
-            <Text style={[styles.dayText, { color: theme.text, opacity: 0.7 }]}>
+            <Animated.Text 
+              style={[
+                styles.dayText, 
+                rTextStyle,
+                { 
+                  color: theme.text, 
+                }
+              ]}
+            >
               {day}
-            </Text>
+            </Animated.Text>
           )}
 
           <View style={{ flex: 1 }} testID="CalendarCell-Space" />
 
           {/* Event Dots / Squares */}
-          <View style={styles.dotsRow} testID="CalendarCell-DotsRow">
+          <Animated.View 
+            style={[
+              styles.dotsRow, 
+              rDotsStyle
+            ]} 
+            testID="CalendarCell-DotsRow"
+          >
             {events.slice(0, 10).map(
               (
                 event,
-                index // Increased limit to show stacking
+                index
               ) => (
                 <View
                   key={index}
@@ -106,7 +156,7 @@ export const CalendarCell = React.memo(
                 />
               )
             )}
-          </View>
+          </Animated.View>
         </View>
 
         {/* Selection Overlay (if drawn on top or integrated?)
@@ -140,7 +190,7 @@ export const CalendarCell = React.memo(
             testID="CalendarCell-SelectionOverlay"
           />
         )}
-      </View>
+      </Animated.View>
     );
   },
   (prev, next) => {
@@ -150,6 +200,7 @@ export const CalendarCell = React.memo(
     const isIdsEqual = prev.continuingEventIds === next.continuingEventIds;
     // Add isFocused check
     const isFocusedEqual = prev.isFocused === next.isFocused;
+    const isBorderPropsEqual = prev.isLastColumn === next.isLastColumn && prev.showBottomBorder === next.showBottomBorder;
 
     return (
       prev.day === next.day &&
@@ -161,7 +212,8 @@ export const CalendarCell = React.memo(
       isDateEqual &&
       isEventsEqual &&
       isIdsEqual &&
-      isFocusedEqual
+      isFocusedEqual &&
+      isBorderPropsEqual
     );
   }
 );
