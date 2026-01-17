@@ -7,7 +7,7 @@ type Event = Database['public']['Tables']['events']['Row'];
 type Subtask = Database['public']['Tables']['event_subtasks']['Row'];
 
 // Fetch Lightweight Events (Month View)
-const fetchMonthEvents = async (date: Date) => {
+export const fetchMonthEvents = async (date: Date) => {
   const start = startOfMonth(date).toISOString();
   const end = endOfMonth(date).toISOString();
 
@@ -24,25 +24,35 @@ const fetchMonthEvents = async (date: Date) => {
   return data;
 };
 
-// Fetch Event Detail (With Subtasks)
+// Fetch Event Detail (With Subtasks in ONE Query)
 const fetchEventDetail = async (eventId: string) => {
-  const [eventResult, subtasksResult] = await Promise.all([
-    supabase
-      .from('events')
-      .select('*')
-      .eq('id', eventId)
-      .single(),
-    supabase
-      .from('event_subtasks')
-      .select('*')
-      .eq('event_id', eventId)
-      .order('order_index', { ascending: true })
-  ]);
+  const start = Date.now();
+  console.log('[Supabase] Starting fetch for event:', eventId);
 
-  if (eventResult.error) throw eventResult.error;
-  if (subtasksResult.error) throw subtasksResult.error;
+  const { data, error } = await supabase
+    .from('events')
+    .select(`
+      id, title, description, subtitle, start_time, end_time, color, is_all_day, priority,
+      subtasks:event_subtasks (
+        id, event_id, title, is_completed, order_index, created_at
+      )
+    `)
+    .eq('id', eventId)
+    .order('order_index', { foreignTable: 'event_subtasks', ascending: true })
+    .single();
 
-  return { ...eventResult.data, subtasks: subtasksResult.data || [] };
+  const duration = Date.now() - start;
+  console.log(`[Supabase Latency] fetchEventDetail took ${duration}ms for event ${eventId}`);
+
+  if (error) {
+      console.error('[Supabase Error]', error);
+      throw error;
+  }
+  if (!data) throw new Error('Event not found');
+
+  // Supabase returns the relation as a property 'subtasks' (aliased above)
+  // We don't need to manually merge.
+  return data;
 };
 
 export const useCalendarQueries = () => {
@@ -142,22 +152,38 @@ export const useCalendarQueries = () => {
   const useDeleteSubtask = () => {
     return useMutation({
       mutationFn: async (subtaskId: string) => {
-        const { error } = await supabase.from('event_subtasks').delete().eq('id', subtaskId);
+        // Select event_id to invalidate query
+        const { data, error } = await supabase
+          .from('event_subtasks')
+          .delete()
+          .eq('id', subtaskId)
+          .select('event_id')
+          .single();
+          
         if (error) throw error;
-        return subtaskId;
+        return data;
       },
-      onSuccess: (_, subtaskId) => {
-        // We might not have eventId here easily unless we pass it, 
-        // but invalidating specific event might be hard without it.
-        // For now, let's rely on the parent component to handle invalidation or 
-        // just invalidate all 'event' queries if needed, but that's expensive.
-        // Actually, we can assume the UI will optimistically update or we can just invalidate 'event' queries broadly strictly if needed,
-        // but better: just rely on refetching the specific event details if the ID is known in the context where mutation is called.
-        // Wait, for delete, Supabase doesn't return the deleted row by default unless select() is used? 
-        // Let's change delete to select event_id if possible.
+      onSuccess: (data) => {
+        if (data?.event_id) {
+            queryClient.invalidateQueries({ queryKey: ['event', data.event_id] });
+        }
       },
     });
   };
+
+  // Mutation: Delete Event
+  const useDeleteEvent = () => {
+      return useMutation({
+          mutationFn: async (eventId: string) => {
+              const { error } = await supabase.from('events').delete().eq('id', eventId);
+              if (error) throw error;
+          },
+          onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: ['events'] });
+          },
+      });
+  };
+
   return {
     useMonthEvents,
     useEventDetail,
@@ -168,18 +194,4 @@ export const useCalendarQueries = () => {
     useDeleteSubtask,
     useDeleteEvent,
   };
-};
-
-// Mutation: Delete Event
-const useDeleteEvent = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: async (eventId: string) => {
-            const { error } = await supabase.from('events').delete().eq('id', eventId);
-            if (error) throw error;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['events'] });
-        },
-    });
 };

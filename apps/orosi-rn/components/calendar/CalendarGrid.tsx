@@ -252,43 +252,31 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
       runOnJS(handleTap)(e.x, e.y);
     });
 
-  // Calculate visible date based on User Rules
+  // Calculate visible date based on Topmost visible month
   const calculateVisibleDate = (y: number): Date | null => {
+      // User Logic: "If the 1st of a month is visible ANYWHERE on screen, emphasize that month."
+      // Since we iterate in order, the first one we find visible will be the "highest" (top-most) visible 1st.
+      
       if (containerHeight.current <= 0) return null;
       
       const visibleStart = y;
       const visibleEnd = y + containerHeight.current;
-
-      // Rule 1 & 2: Find months where "1st" (offset) is visible
-      // visibleStart <= offset <= visibleEnd
-      // We want the TOP-most 1st, i.e., smallest offset.
       
-      // Optimization: Bisect or find efficiently? Since array is sorted by offset.
-      // Filter is O(N) but N=2400 is small enough for simple find/loop or we can find index.
-      // Let's iterate.
-      
-      // Potential candidate with 1st visible
-      let firstDayVisibleCandidate: MonthConfig | null = null;
-      
+      // 1. Priority: Is there a month whose Start Date (offset) is visible?
       for (const config of monthConfigs) {
-          // If config started after viewport, and we already found a candidate (which would be earlier), break?
-          // No, we want smallest offset. Array is sorted.
-          // So the first one we find matching the condition IS the top-most.
-          
+          // If the start of the month is within the viewport
           if (config.offset >= visibleStart && config.offset < visibleEnd) {
-             firstDayVisibleCandidate = config;
-             break;
+             return config.date; 
           }
-          
+          // Optimization: If we went past the viewport, stop.
           if (config.offset >= visibleEnd) break;
       }
-      
-      if (firstDayVisibleCandidate) return firstDayVisibleCandidate.date;
-      
-      // Rule 3: No 1st visible. Find month covering top (visibleStart).
-      const coveringCandidate = monthConfigs.find(c => c.offset <= visibleStart && c.offset + c.height > visibleStart);
-      if (coveringCandidate) return coveringCandidate.date;
 
+      // 2. Fallback: No "1st" is visible (e.g., in the middle of a long month).
+      // Return the month covering the top of the screen.
+      const coveringCandidate = monthConfigs.find(c => c.offset <= visibleStart && c.offset + c.height > visibleStart);
+      
+      if (coveringCandidate) return coveringCandidate.date;
       return null;
   };
 
@@ -415,9 +403,9 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
               containerHeight.current = e.nativeEvent.layout.height;
           }}
           initialScrollIndex={Math.max(0, Math.min((focusedDay.getFullYear() - BASE_YEAR) * 12 + focusedDay.getMonth(), TOTAL_MONTHS - 1))}
-          initialNumToRender={1}
-          windowSize={2} // Very tight window to prevent over-fetching
-          maxToRenderPerBatch={1}
+          initialNumToRender={2}
+          windowSize={3} // Reduced for lighter initial load
+          maxToRenderPerBatch={2}
           removeClippedSubviews={true}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={VIEWABILITY_CONFIG}

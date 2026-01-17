@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { StyleSheet, View, DrawerLayoutAndroid, Platform, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, StatusBar, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CalendarHeader } from '@/components/calendar/CalendarHeader';
@@ -10,28 +10,25 @@ import { useColorScheme } from '@/components/useColorScheme';
 
 export default function TabOneScreen() {
   const colorScheme = useColorScheme();
-  
-  // Drawer logic usually handled by Expo Router's Drawer or simple state.
-  // The 'onOpenDrawer' in header was for a hamburger menu.
-  // We can just log or implement a simple DrawerLayout later. 
-  // For now, let's keep it consistent with the UI.
-  
-  const [containerWidth, setContainerWidth] = React.useState(0);
+  const { width: windowWidth } = useWindowDimensions();
+  const containerWidth = Math.min(windowWidth, 1280);
+
   return (
     <View style={[styles.container, { backgroundColor: Colors[colorScheme ?? 'light'].background }]} testID='app'>
       <SafeAreaView style={{ flex: 1, alignItems: 'center' }}>
          <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
           <View 
             style={[styles.contentContainer]} 
-            onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
             testID='app-content-container'
           >
-            <CalendarHeader 
-              onOpenDrawer={() => {}}
-              width={containerWidth > 0 ? containerWidth : undefined}
-            />
-            {containerWidth > 0 && <CalendarGrid width={containerWidth} />}
-            <EventDetailModal />
+              <CalendarHeader 
+                onOpenDrawer={() => {}}
+                width={containerWidth}
+              />
+              <CalendarGrid 
+                  width={containerWidth} 
+              />
+              <EventDetailModal />
          </View>
       </SafeAreaView>
     </View>
