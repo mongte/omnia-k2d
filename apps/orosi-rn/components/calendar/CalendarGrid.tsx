@@ -45,7 +45,14 @@ interface CalendarGridProps {
   showEvents?: boolean;
 }
 
-export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, onFocusedDayChange, selectedRange: propSelectedRange, showEvents = true }: CalendarGridProps) {
+export function CalendarGrid({
+  width,
+  focusedDay: propFocusedDay,
+  onPressDay,
+  onFocusedDayChange,
+  selectedRange: propSelectedRange,
+  showEvents = true,
+}: CalendarGridProps) {
   const flatListRef = useRef<FlatList>(null);
   const [layoutReady, setLayoutReady] = useState(false);
   const containerHeight = useRef(0);
@@ -60,10 +67,11 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
   const lastUpdateSource = useCalendarStore((state) => state.lastUpdateSource);
   const isYearScrolling = useCalendarStore((state) => state.isYearScrolling);
   const toggleDaySelection = useCalendarStore(
-    (state) => state.toggleDaySelection
+    (state) => state.toggleDaySelection,
   );
   const storeSelectedRange = useCalendarStore((state) => state.selectedRange);
-  const selectedRange = propSelectedRange !== undefined ? propSelectedRange : storeSelectedRange;
+  const selectedRange =
+    propSelectedRange !== undefined ? propSelectedRange : storeSelectedRange;
   const setSelectedRange = useCalendarStore((state) => state.setSelectedRange);
 
   // Gesture State
@@ -129,7 +137,7 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
     const absoluteY = y + scrollY.value;
 
     const config = monthConfigs.find(
-      (c) => absoluteY >= c.offset && absoluteY < c.offset + c.height
+      (c) => absoluteY >= c.offset && absoluteY < c.offset + c.height,
     );
     if (!config) return null;
 
@@ -144,7 +152,7 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
       return new Date(
         config.date.getFullYear(),
         config.date.getMonth(),
-        dayNum
+        dayNum,
       );
     }
     return null;
@@ -153,7 +161,7 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
   const handleDragUpdate = (
     x: number,
     y: number,
-    state: 'start' | 'active' | 'end'
+    state: 'start' | 'active' | 'end',
   ) => {
     if (state === 'end') {
       isDragging.current = false;
@@ -182,7 +190,7 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
       // No, let me check imports in code block below.
       // I included `isBefore`, `isAfter`, `isSameDay` in imports.
       // Let's verify.
-      
+
       /*
       import {
         getDaysInMonth,
@@ -193,9 +201,9 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
         // Missing isBefore, isAfter, isSameDay?
       } from 'date-fns';
       */
-      
+
       // I'll make sure to include them.
-      
+
       const start = date < dragStartDate.current ? date : dragStartDate.current;
       const end = date > dragStartDate.current ? date : dragStartDate.current;
       setSelectedRange({ start, end });
@@ -208,15 +216,18 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
   const handleTap = (x: number, y: number) => {
     const date = getDateAtPoint(x, y);
     if (date) {
-      if (selectedRange && selectedRange.start.getTime() !== selectedRange.end.getTime()) {
-         const startT = selectedRange.start.getTime();
-         const endT = selectedRange.end.getTime();
-         const dateT = date.getTime();
-         
-         if (dateT >= startT && dateT <= endT) {
-             setDetailModal(true, null, selectedRange);
-             return;
-         }
+      if (
+        selectedRange &&
+        selectedRange.start.getTime() !== selectedRange.end.getTime()
+      ) {
+        const startT = selectedRange.start.getTime();
+        const endT = selectedRange.end.getTime();
+        const dateT = date.getTime();
+
+        if (dateT >= startT && dateT <= endT) {
+          setDetailModal(true, null, selectedRange);
+          return;
+        }
       }
 
       if (onPressDay) {
@@ -252,32 +263,22 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
       runOnJS(handleTap)(e.x, e.y);
     });
 
-  // Calculate visible date based on Topmost visible month
   const calculateVisibleDate = (y: number): Date | null => {
-      // User Logic: "If the 1st of a month is visible ANYWHERE on screen, emphasize that month."
-      // Since we iterate in order, the first one we find visible will be the "highest" (top-most) visible 1st.
-      
-      if (containerHeight.current <= 0) return null;
-      
-      const visibleStart = y;
-      const visibleEnd = y + containerHeight.current;
-      
-      // 1. Priority: Is there a month whose Start Date (offset) is visible?
-      for (const config of monthConfigs) {
-          // If the start of the month is within the viewport
-          if (config.offset >= visibleStart && config.offset < visibleEnd) {
-             return config.date; 
-          }
-          // Optimization: If we went past the viewport, stop.
-          if (config.offset >= visibleEnd) break;
-      }
+    // Logic: "Emphasize month when its 1st day appears at the top."
+    // We identify which month block is at the top (y).
 
-      // 2. Fallback: No "1st" is visible (e.g., in the middle of a long month).
-      // Return the month covering the top of the screen.
-      const coveringCandidate = monthConfigs.find(c => c.offset <= visibleStart && c.offset + c.height > visibleStart);
-      
-      if (coveringCandidate) return coveringCandidate.date;
-      return null;
+    // 1. Find the month config that simply covers the current scan line (y)
+    // We look ahead significantly (1.5 cells) to prioritize the new month
+    // as soon as its first row (Day 1) becomes visible near the top.
+    const searchY = Math.max(0, y + CELL_HEIGHT * 1.5);
+
+    const configIndex = monthConfigs.findIndex(
+      (c) => searchY >= c.offset && searchY < c.offset + c.height,
+    );
+
+    if (configIndex === -1) return null;
+
+    return monthConfigs[configIndex].date;
   };
 
   const handleScrollFinish = () => {
@@ -296,11 +297,11 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
     const newDate = calculateVisibleDate(currentY);
 
     if (newDate && !isSameMonth(newDate, focusedDayRef.current)) {
-       if (onFocusedDayChange) {
-          onFocusedDayChange(newDate);
-       } else {
-          setFocusedDay(newDate, 'grid');
-       }
+      if (onFocusedDayChange) {
+        onFocusedDayChange(newDate);
+      } else {
+        setFocusedDay(newDate, 'grid');
+      }
     }
   };
 
@@ -312,23 +313,22 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
     // Check if we need to scroll
     // If propFocusedDay is provided, we check if it is "programmatically needed"
     // i.e., is the user "already looking at" this month?
-    
+
     // Calculate what the "Visible Month" is right now based on scrollY
     const visibleDate = calculateVisibleDate(scrollY.value);
-    
+
     // If we are already looking at the month of focusedDay (according to our logic),
     // then WE DO NOT SCROLL. This prevents snapping.
     if (visibleDate && isSameMonth(visibleDate, focusedDay)) {
-        return;
+      return;
     }
 
     if (!propFocusedDay) {
       if (lastUpdateSource === 'grid') return;
       if (isYearScrolling) return;
     }
-    
-    // ... Proceed to scroll
 
+    // ... Proceed to scroll
 
     const diffYears = focusedDay.getFullYear() - BASE_YEAR;
     const diffMonths = diffYears * 12 + focusedDay.getMonth();
@@ -352,22 +352,20 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-       // logic moved to handleScrollFinish / calculateVisibleDate
-    }
+      // logic moved to handleScrollFinish / calculateVisibleDate
+    },
   ).current;
-
-
 
   // Render Month Item using extracted component
   const renderItem = ({ item }: { item: MonthConfig }) => {
     return (
-      <MonthItem 
-          item={item} 
-          width={width} 
-          CELL_WIDTH={CELL_WIDTH} 
-          selectedRange={selectedRange}
-          showEvents={showEvents}
-          isFocused={isSameMonth(item.date, focusedDay)}
+      <MonthItem
+        item={item}
+        width={width}
+        CELL_WIDTH={CELL_WIDTH}
+        selectedRange={selectedRange}
+        showEvents={showEvents}
+        isFocused={isSameMonth(item.date, focusedDay)}
       />
     );
   };
@@ -399,10 +397,17 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
             index,
           })}
           onLayout={(e) => {
-              setLayoutReady(true);
-              containerHeight.current = e.nativeEvent.layout.height;
+            setLayoutReady(true);
+            containerHeight.current = e.nativeEvent.layout.height;
           }}
-          initialScrollIndex={Math.max(0, Math.min((focusedDay.getFullYear() - BASE_YEAR) * 12 + focusedDay.getMonth(), TOTAL_MONTHS - 1))}
+          initialScrollIndex={Math.max(
+            0,
+            Math.min(
+              (focusedDay.getFullYear() - BASE_YEAR) * 12 +
+                focusedDay.getMonth(),
+              TOTAL_MONTHS - 1,
+            ),
+          )}
           initialNumToRender={2}
           windowSize={3} // Reduced for lighter initial load
           maxToRenderPerBatch={2}
@@ -423,6 +428,7 @@ export function CalendarGrid({ width, focusedDay: propFocusedDay, onPressDay, on
             }
           }}
           onMomentumScrollEnd={handleScrollFinish}
+          extraData={focusedDay}
         />
       </GestureDetector>
     </View>

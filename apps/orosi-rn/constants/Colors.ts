@@ -4,7 +4,7 @@ const AppColors = {
   backgroundDark: '#102216',
   gridLight: '#F5F5F5',
   gridDark: '#1F2E25',
-  
+
   // Event Colors (20 distinctive colors)
   eventOrange: '#FF9100',
   eventDarkGreen: '#2E7D32',
@@ -52,7 +52,9 @@ const EVENT_COLOR_VALUES = [
 ];
 
 const getRandomEventColor = () => {
-    return EVENT_COLOR_VALUES[Math.floor(Math.random() * EVENT_COLOR_VALUES.length)];
+  return EVENT_COLOR_VALUES[
+    Math.floor(Math.random() * EVENT_COLOR_VALUES.length)
+  ];
 };
 
 export default {

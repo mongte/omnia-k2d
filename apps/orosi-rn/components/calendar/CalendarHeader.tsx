@@ -2,12 +2,7 @@ import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { format, isSameMonth } from 'date-fns';
 import React, { useMemo } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TodayIcon } from '../ui/icons/CalendarIcons';
 import { useCalendarStore } from './model/useCalendarStore';
 import { GradientSelector } from './ui/GradientSelector';
@@ -100,7 +95,7 @@ export function CalendarHeader({
                 // Update focused day with 'header' source to sync grid
                 setFocusedDay(
                   new Date(year, current.getMonth(), current.getDate()),
-                  'header'
+                  'header',
                 );
               }
             }}
@@ -150,10 +145,7 @@ export function CalendarHeader({
             style={styles.todayButton}
             onPress={() => setFocusedDay(new Date())}
           >
-            <TodayIcon
-              size={18}
-              color={Colors.AppColors.primary}
-            />
+            <TodayIcon size={18} color={Colors.AppColors.primary} />
           </TouchableOpacity>
         </View>
       </View>

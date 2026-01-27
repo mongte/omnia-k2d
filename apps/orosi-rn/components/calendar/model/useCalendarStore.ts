@@ -30,7 +30,7 @@ interface CalendarState {
   setDetailModal: (
     isOpen: boolean,
     date?: Date | null,
-    range?: DateRange | null
+    range?: DateRange | null,
   ) => void;
 
   // Selectors (Helpers as functions if needed, or derived state)

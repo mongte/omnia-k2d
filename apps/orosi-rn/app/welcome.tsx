@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View, Dimensions, ImageBackground } from 'react-native';
 import { useRouter } from 'expo-router';
-import Reanimated, { 
-    useSharedValue, 
-    useAnimatedStyle, 
-    withTiming, 
+import Reanimated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
 } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
 
     // Auto Navigate after delay
     const timer = setTimeout(() => {
-        router.replace('/login');
+      router.replace('/login');
     }, 2500); // 2.5 seconds delay
 
     return () => clearTimeout(timer);
@@ -34,10 +34,10 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       <Reanimated.View style={[styles.content, animatedStyle]}>
-        <ImageBackground 
-            source={require('../assets/images/splash-bg.png')} 
-            style={styles.backgroundImage}
-            resizeMode="cover"
+        <ImageBackground
+          source={require('../assets/images/splash-bg.png')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
         />
       </Reanimated.View>
     </View>

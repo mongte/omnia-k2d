@@ -57,26 +57,26 @@ export const CalendarCell = React.memo(
     const focusDerived = useSharedValue(isFocused ? 1 : 0);
 
     useEffect(() => {
-        focusDerived.value = withTiming(isFocused ? 1 : 0, { duration: 150 });
+      focusDerived.value = withTiming(isFocused ? 1 : 0, { duration: 150 });
     }, [isFocused]);
 
     const rContainerStyle = useAnimatedStyle(() => {
-        const borderColor = interpolateColor(
-            focusDerived.value,
-            [0, 1],
-            [theme.grid, '#E0E0E0']
-        );
-        return { borderColor };
+      const borderColor = interpolateColor(
+        focusDerived.value,
+        [0, 1],
+        [theme.grid, '#E0E0E0'],
+      );
+      return { borderColor };
     });
 
     const rTextStyle = useAnimatedStyle(() => {
-        const opacity = interpolate(focusDerived.value, [0, 1], [0.2, 0.9]);
-        return { opacity };
+      const opacity = interpolate(focusDerived.value, [0, 1], [0.2, 0.9]);
+      return { opacity };
     });
 
     const rDotsStyle = useAnimatedStyle(() => {
-        const opacity = interpolate(focusDerived.value, [0, 1], [0.3, 1]);
-        return { opacity };
+      const opacity = interpolate(focusDerived.value, [0, 1], [0.3, 1]);
+      return { opacity };
     });
 
     if (day === null) {
@@ -121,13 +121,13 @@ export const CalendarCell = React.memo(
               <Text style={styles.todayText}>{day}</Text>
             </View>
           ) : (
-            <Animated.Text 
+            <Animated.Text
               style={[
-                styles.dayText, 
+                styles.dayText,
                 rTextStyle,
-                { 
-                  color: theme.text, 
-                }
+                {
+                  color: theme.text,
+                },
               ]}
             >
               {day}
@@ -137,25 +137,17 @@ export const CalendarCell = React.memo(
           <View style={{ flex: 1 }} testID="CalendarCell-Space" />
 
           {/* Event Dots / Squares */}
-          <Animated.View 
-            style={[
-              styles.dotsRow, 
-              rDotsStyle
-            ]} 
+          <Animated.View
+            style={[styles.dotsRow, rDotsStyle]}
             testID="CalendarCell-DotsRow"
           >
-            {events.slice(0, 10).map(
-              (
-                event,
-                index
-              ) => (
-                <View
-                  key={index}
-                  testID={`CalendarCell-Dot-${index}`}
-                  style={[styles.dot, { backgroundColor: event.color }]}
-                />
-              )
-            )}
+            {events.slice(0, 10).map((event, index) => (
+              <View
+                key={index}
+                testID={`CalendarCell-Dot-${index}`}
+                style={[styles.dot, { backgroundColor: event.color }]}
+              />
+            ))}
           </Animated.View>
         </View>
 
@@ -200,7 +192,9 @@ export const CalendarCell = React.memo(
     const isIdsEqual = prev.continuingEventIds === next.continuingEventIds;
     // Add isFocused check
     const isFocusedEqual = prev.isFocused === next.isFocused;
-    const isBorderPropsEqual = prev.isLastColumn === next.isLastColumn && prev.showBottomBorder === next.showBottomBorder;
+    const isBorderPropsEqual =
+      prev.isLastColumn === next.isLastColumn &&
+      prev.showBottomBorder === next.showBottomBorder;
 
     return (
       prev.day === next.day &&
@@ -215,7 +209,7 @@ export const CalendarCell = React.memo(
       isFocusedEqual &&
       isBorderPropsEqual
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({

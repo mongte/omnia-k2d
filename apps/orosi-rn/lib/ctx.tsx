@@ -12,7 +12,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
 });
 
-export function useSession() {
+export function useSession(): AuthContextType {
   return useContext(AuthContext);
 }
 

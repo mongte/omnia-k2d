@@ -35,7 +35,8 @@ interface EventDotStyle {
 export const EventDetailModal = () => {
   const { detailModal, setDetailModal } = useCalendarStore();
   const { isOpen, date, range } = detailModal;
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEventDisplayInfo | null>(null);
+  const [selectedEvent, setSelectedEvent] =
+    useState<CalendarEventDisplayInfo | null>(null);
   const [isReturning, setIsReturning] = useState(false);
 
   // Fetch events for the month of the selected date/range
@@ -43,51 +44,59 @@ export const EventDetailModal = () => {
   const { data: monthEvents } = useCalendarQueries().useMonthEvents(queryDate);
 
   // Helper to filter events from the fetched month data
-  const getEventsForDate = (targetDate: Date, allEvents: any[] | undefined): CalendarEventDisplayInfo[] => {
+  const getEventsForDate = (
+    targetDate: Date,
+    allEvents: any[] | undefined,
+  ): CalendarEventDisplayInfo[] => {
     if (!allEvents) return [];
 
     // Filter events valid for this day
     // DB events have start_time/end_time as ISO strings
-    const eventsOnDay = allEvents.filter(e => {
-        const start = new Date(e.start_time);
-        const end = new Date(e.end_time);
-        
-        // Check overlap (same logic as before effectively)
-        return isSameDay(start, targetDate) || 
-               isSameDay(end, targetDate) || 
-               (start < targetDate && end > targetDate); 
+    const eventsOnDay = allEvents.filter((e) => {
+      const start = new Date(e.start_time);
+      const end = new Date(e.end_time);
+
+      // Check overlap (same logic as before effectively)
+      return (
+        isSameDay(start, targetDate) ||
+        isSameDay(end, targetDate) ||
+        (start < targetDate && end > targetDate)
+      );
     });
 
     return eventsOnDay.map((e: any) => {
-        const startTime = new Date(e.start_time);
-        const endTime = new Date(e.end_time);
+      const startTime = new Date(e.start_time);
+      const endTime = new Date(e.end_time);
 
-        const isMultiDay = !isSameDay(startTime, endTime);
-        const isRangeStart = isSameDay(startTime, targetDate);
-        const isRangeEnd = isSameDay(endTime, targetDate);
-        const isContinuing = isMultiDay && !isRangeStart && !isRangeEnd;
+      const isMultiDay = !isSameDay(startTime, endTime);
+      const isRangeStart = isSameDay(startTime, targetDate);
+      const isRangeEnd = isSameDay(endTime, targetDate);
+      const isContinuing = isMultiDay && !isRangeStart && !isRangeEnd;
 
-        return {
-          id: e.id,
-          title: e.title,
-          color: e.color || '#ccc',
-          startTime,
-          endTime,
-          isMultiDay,
-          isRangeStart,
-          isRangeEnd,
-          isContinuing,
-        };
+      return {
+        id: e.id,
+        title: e.title,
+        color: e.color || '#ccc',
+        startTime,
+        endTime,
+        isMultiDay,
+        isRangeStart,
+        isRangeEnd,
+        isContinuing,
+      };
     });
   };
 
-  const getEventDotStyle = (event: CalendarEventDisplayInfo, isLeft: boolean): EventDotStyle => {
+  const getEventDotStyle = (
+    event: CalendarEventDisplayInfo,
+    isLeft: boolean,
+  ): EventDotStyle => {
     const { color } = event;
     return {
       backgroundColor: color,
-      marginLeft: -6
-    }
-  }
+      marginLeft: -6,
+    };
+  };
 
   const eventsGrouped = useMemo(() => {
     if (range) {
@@ -154,232 +163,255 @@ export const EventDetailModal = () => {
 
           {/* Modal Content */}
           <Animated.View
-            entering={ZoomIn.springify()
-              .damping(20)
-              .mass(1)
-              .stiffness(150)}
-            exiting={ZoomOut.springify()
-              .damping(20)
-              .mass(1)
-              .stiffness(150)}
+            entering={ZoomIn.springify().damping(20).mass(1).stiffness(150)}
+            exiting={ZoomOut.springify().damping(20).mass(1).stiffness(150)}
             style={styles.modalContainer}
           >
-            {displayDate && (
-                selectedEvent ? (
-                    <Animated.View 
-                        key="detail-view"
-                        style={{ flex: 1 }} 
-                        entering={SlideInRight} 
-                        exiting={SlideOutRight}
+            {displayDate &&
+              (selectedEvent ? (
+                <Animated.View
+                  key="detail-view"
+                  style={{ flex: 1 }}
+                  entering={SlideInRight}
+                  exiting={SlideOutRight}
+                >
+                  <EventDetailView
+                    event={selectedEvent}
+                    onBack={() => {
+                      setIsReturning(true);
+                      setSelectedEvent(null);
+                    }}
+                  />
+                </Animated.View>
+              ) : (
+                <Animated.View
+                  key="list-view"
+                  style={{ flex: 1 }}
+                  entering={isReturning ? SlideInLeft : undefined}
+                  exiting={SlideOutLeft}
+                >
+                  <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+                    <View style={styles.header}>
+                      <View>
+                        <Text style={styles.headerTitle}>Events</Text>
+                        <Text style={styles.headerSubtitle}>
+                          {range
+                            ? `${format(range.start, 'MMM d')} — ${format(
+                                range.end,
+                                'd, yyyy',
+                              )}`
+                            : format(displayDate, 'MMM d, yyyy')}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={onClose}
+                        style={styles.closeButton}
+                      >
+                        <Text style={styles.closeButtonText}>✕</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <ScrollView
+                      style={styles.scrollView}
+                      contentContainerStyle={styles.scrollContent}
                     >
-                        <EventDetailView 
-                            event={selectedEvent} 
-                            onBack={() => {
-                              setIsReturning(true);
-                              setSelectedEvent(null);
-                            }} 
-                        />
-                    </Animated.View>
-                ) : (
-                    <Animated.View 
-                        key="list-view"
-                        style={{ flex: 1 }} 
-                        entering={isReturning ? SlideInLeft : undefined} 
-                        exiting={SlideOutLeft}
-                    >
-                      <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-                        <View style={styles.header}>
-                          <View>
-                            <Text style={styles.headerTitle}>Events</Text>
-                            <Text style={styles.headerSubtitle}>
-                              {range
-                                ? `${format(range.start, 'MMM d')} — ${format(
-                                    range.end,
-                                    'd, yyyy'
-                                  )}`
-                                : format(displayDate, 'MMM d, yyyy')}
-                            </Text>
-                          </View>
-                          <TouchableOpacity
-                            onPress={onClose}
-                            style={styles.closeButton}
-                          >
-                            <Text style={styles.closeButtonText}>✕</Text>
-                          </TouchableOpacity>
-                        </View>
+                      {/* Center Line */}
+                      <View style={styles.centerLine} />
 
-                        <ScrollView
-                          style={styles.scrollView}
-                          contentContainerStyle={styles.scrollContent}
-                        >
-                          {/* Center Line */}
-                          <View style={styles.centerLine} />
-
-                          {renderItems.map((item, index) => {
-                            if (item.type === 'header') {
-                              return (
-                                <View
-                                  key={`header-${item.date.toISOString()}`}
-                                  style={styles.dateMarkerContainer}
-                                >
-                                  <View style={styles.dateMarker}>
-                                    <Text style={styles.dateMarkerText}>
-                                      {format(item.date, 'MMM d').toUpperCase()}
-                                    </Text>
-                                  </View>
-                                </View>
-                              );
-                            }
-
-                            const event = item.data as CalendarEventDisplayInfo;
-                            const isLeft = index % 2 !== 0; 
-                            const {
-                              isMultiDay,
-                              isRangeStart,
-                              isRangeEnd,
-                              isContinuing,
-                            } = event;
-
-                          const dotStyle = getEventDotStyle(event, isLeft);
-
+                      {renderItems.map((item, index) => {
+                        if (item.type === 'header') {
                           return (
-                              <View key={`${event.id}_${index}`} style={[styles.timelineItem, isLeft ? styles.leftItem : styles.rightItem]}>
-                                      {/* Connector & Dot */}
-                                      <View style={[styles.connectorContainer]}>
-                                          <View style={[
-                                              styles.connectorLine, 
-                                              isLeft ? { right: '50%', marginRight: 5 } : { left: '50%', marginLeft: 5 }
-                                          ]} />
-                                          
-                                          {!isRangeStart && (
-                                            <View style={{
-                                                position: 'absolute',
-                                                top: -20, 
-                                                left: '50%',
-                                                marginLeft: (dotStyle.marginLeft as number) - 1, 
-                                            }}>
-                                               <ConnectorArrow direction="up" color={event.color} />
-                                            </View>
-                                          )}
-                                          {!isRangeEnd && (
-                                            <View style={{
-                                                position: 'absolute',
-                                                top: 12, 
-                                                left: '50%',
-                                                marginLeft: (dotStyle.marginLeft as number) - 1,
-                                            }}>
-                                                <ConnectorArrow direction="down" color={event.color} />
-                                            </View>
-                                          )}
-
-                                      <View style={[styles.dot, dotStyle]} />
-                                  </View>
-
-                                {/* Content Card */}
-                                <TouchableOpacity
-                                  activeOpacity={0.9}
-                                  onPress={() => setSelectedEvent(event)}
-                                  style={[
-                                    styles.cardContent,
-                                    isLeft ? styles.cardLeft : styles.cardRight,
-                                  ]}
-                                >
-                                  <Text
-                                    style={[
-                                      styles.timeText,
-                                      { color: event.color },
-                                      isLeft
-                                        ? extraStyles.textAlignRight
-                                        : extraStyles.textAlignLeft,
-                                    ]}
-                                  >
-                                    {format(event.startTime, 'hh:mm a')}
-                                  </Text>
-                                  <Text
-                                    style={[
-                                      styles.eventTitle,
-                                      isLeft
-                                        ? extraStyles.textAlignRight
-                                        : extraStyles.textAlignLeft,
-                                    ]}
-                                  >
-                                    {event.title}
-                                  </Text>
-                                  <Text
-                                    style={[
-                                      styles.eventDesc,
-                                      isLeft
-                                        ? extraStyles.textAlignRight
-                                        : extraStyles.textAlignLeft,
-                                    ]}
-                                    numberOfLines={2}
-                                  >
-                                    Tap for details
-                                  </Text>
-
-                                  <View
-                                    style={[
-                                      styles.indicatorBar,
-                                      { backgroundColor: event.color },
-                                    ]}
-                                  />
-                                </TouchableOpacity>
+                            <View
+                              key={`header-${item.date.toISOString()}`}
+                              style={styles.dateMarkerContainer}
+                            >
+                              <View style={styles.dateMarker}>
+                                <Text style={styles.dateMarkerText}>
+                                  {format(item.date, 'MMM d').toUpperCase()}
+                                </Text>
                               </View>
-                            );
-                          })}
+                            </View>
+                          );
+                        }
 
-                          <View style={{ height: 100 }} />
-                        </ScrollView>
+                        const event = item.data as CalendarEventDisplayInfo;
+                        const isLeft = index % 2 !== 0;
+                        const {
+                          isMultiDay,
+                          isRangeStart,
+                          isRangeEnd,
+                          isContinuing,
+                        } = event;
 
-                        <View style={styles.footer}>
-                          <TouchableOpacity 
-                            style={styles.addButton}
-                            onPress={() => {
-                                const start = displayDate ? new Date(displayDate) : new Date();
-                                // Default to next hour if it's "now", or just use the date if it's a specific day?
-                                // If displayDate is "today" (from date state), maybe set time to next hour.
-                                // But displayDate is usually 00:00 if coming from grid selection?
-                                // Let's set it to current time if isSameDay(displayDate, new Date()), else 9am.
-                                
-                                const Now = new Date();
-                                if (isSameDay(start, Now)) {
-                                    start.setHours(Now.getHours() + 1, 0, 0, 0);
-                                } else {
-                                    start.setHours(9, 0, 0, 0);
-                                }
-                                
-                                const end = new Date(start);
-                                
-                                // Reset end date if a multi-day range is selected
-                                if (range && !isSameDay(range.start, range.end)) {
-                                    end.setFullYear(range.end.getFullYear(), range.end.getMonth(), range.end.getDate());
-                                }
-                                
-                                end.setHours(start.getHours() + 1);
+                        const dotStyle = getEventDotStyle(event, isLeft);
 
-                                const randomColor = Colors.getRandomEventColor();
-
-                                const newEvent: CalendarEventDisplayInfo = {
-                                    id: '', // Empty ID signals new event
-                                    title: '',
-                                    startTime: start,
-                                    endTime: end,
-                                    color: randomColor,
-                                    isMultiDay: false,
-                                    isRangeStart: true,
-                                    isRangeEnd: true,
-                                    isContinuing: false,
-                                };
-                                setSelectedEvent(newEvent);
-                            }}
+                        return (
+                          <View
+                            key={`${event.id}_${index}`}
+                            style={[
+                              styles.timelineItem,
+                              isLeft ? styles.leftItem : styles.rightItem,
+                            ]}
                           >
-                            <Text style={styles.addButtonText}>+ Add New Event</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </SafeAreaView>
-                    </Animated.View>
-                )
-            )}
+                            {/* Connector & Dot */}
+                            <View style={[styles.connectorContainer]}>
+                              <View
+                                style={[
+                                  styles.connectorLine,
+                                  isLeft
+                                    ? { right: '50%', marginRight: 5 }
+                                    : { left: '50%', marginLeft: 5 },
+                                ]}
+                              />
+
+                              {!isRangeStart && (
+                                <View
+                                  style={{
+                                    position: 'absolute',
+                                    top: -20,
+                                    left: '50%',
+                                    marginLeft:
+                                      (dotStyle.marginLeft as number) - 1,
+                                  }}
+                                >
+                                  <ConnectorArrow
+                                    direction="up"
+                                    color={event.color}
+                                  />
+                                </View>
+                              )}
+                              {!isRangeEnd && (
+                                <View
+                                  style={{
+                                    position: 'absolute',
+                                    top: 12,
+                                    left: '50%',
+                                    marginLeft:
+                                      (dotStyle.marginLeft as number) - 1,
+                                  }}
+                                >
+                                  <ConnectorArrow
+                                    direction="down"
+                                    color={event.color}
+                                  />
+                                </View>
+                              )}
+
+                              <View style={[styles.dot, dotStyle]} />
+                            </View>
+
+                            {/* Content Card */}
+                            <TouchableOpacity
+                              activeOpacity={0.9}
+                              onPress={() => setSelectedEvent(event)}
+                              style={[
+                                styles.cardContent,
+                                isLeft ? styles.cardLeft : styles.cardRight,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.timeText,
+                                  { color: event.color },
+                                  isLeft
+                                    ? extraStyles.textAlignRight
+                                    : extraStyles.textAlignLeft,
+                                ]}
+                              >
+                                {format(event.startTime, 'hh:mm a')}
+                              </Text>
+                              <Text
+                                style={[
+                                  styles.eventTitle,
+                                  isLeft
+                                    ? extraStyles.textAlignRight
+                                    : extraStyles.textAlignLeft,
+                                ]}
+                              >
+                                {event.title}
+                              </Text>
+                              <Text
+                                style={[
+                                  styles.eventDesc,
+                                  isLeft
+                                    ? extraStyles.textAlignRight
+                                    : extraStyles.textAlignLeft,
+                                ]}
+                                numberOfLines={2}
+                              >
+                                Tap for details
+                              </Text>
+
+                              <View
+                                style={[
+                                  styles.indicatorBar,
+                                  { backgroundColor: event.color },
+                                ]}
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        );
+                      })}
+
+                      <View style={{ height: 100 }} />
+                    </ScrollView>
+
+                    <View style={styles.footer}>
+                      <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => {
+                          const start = displayDate
+                            ? new Date(displayDate)
+                            : new Date();
+                          // Default to next hour if it's "now", or just use the date if it's a specific day?
+                          // If displayDate is "today" (from date state), maybe set time to next hour.
+                          // But displayDate is usually 00:00 if coming from grid selection?
+                          // Let's set it to current time if isSameDay(displayDate, new Date()), else 9am.
+
+                          const Now = new Date();
+                          if (isSameDay(start, Now)) {
+                            start.setHours(Now.getHours() + 1, 0, 0, 0);
+                          } else {
+                            start.setHours(9, 0, 0, 0);
+                          }
+
+                          const end = new Date(start);
+
+                          // Reset end date if a multi-day range is selected
+                          if (range && !isSameDay(range.start, range.end)) {
+                            end.setFullYear(
+                              range.end.getFullYear(),
+                              range.end.getMonth(),
+                              range.end.getDate(),
+                            );
+                          }
+
+                          end.setHours(start.getHours() + 1);
+
+                          const randomColor = Colors.getRandomEventColor();
+
+                          const newEvent: CalendarEventDisplayInfo = {
+                            id: '', // Empty ID signals new event
+                            title: '',
+                            startTime: start,
+                            endTime: end,
+                            color: randomColor,
+                            isMultiDay: false,
+                            isRangeStart: true,
+                            isRangeEnd: true,
+                            isContinuing: false,
+                          };
+                          setSelectedEvent(newEvent);
+                        }}
+                      >
+                        <Text style={styles.addButtonText}>
+                          + Add New Event
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </SafeAreaView>
+                </Animated.View>
+              ))}
           </Animated.View>
         </React.Fragment>
       )}
@@ -391,16 +423,16 @@ const styles = StyleSheet.create({
   absoluteContainer: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1000,
-    justifyContent: 'center', 
-    alignItems: 'center',     
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
     backgroundColor: '#fff',
-    width: '90%',      
-    height: '70%',     
-    borderRadius: 24,  
+    width: '90%',
+    height: '70%',
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 }, 
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 20,
@@ -447,7 +479,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollContent: {
-    paddingVertical: 24, 
+    paddingVertical: 24,
   },
   centerLine: {
     position: 'absolute',
@@ -479,8 +511,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     width: '100%',
     position: 'relative',
-    height: 80, 
-    paddingHorizontal: 16, 
+    height: 80,
+    paddingHorizontal: 16,
   },
   leftItem: {
     justifyContent: 'flex-start',
@@ -500,33 +532,33 @@ const styles = StyleSheet.create({
   cardContent: {
     width: '42%',
     paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0)', 
-    zIndex: 10, 
+    backgroundColor: 'rgba(255, 255, 255, 0)',
+    zIndex: 10,
   },
   cardLeft: {
     alignItems: 'flex-end',
-    paddingRight: 12, 
+    paddingRight: 12,
   },
   cardRight: {
     alignItems: 'flex-start',
-    paddingLeft: 12, 
+    paddingLeft: 12,
   },
   connectorLine: {
     position: 'absolute',
-    height: 2, 
+    height: 2,
     top: 6,
-    width: '50%', 
-    borderTopWidth: 1.5, 
+    width: '50%',
+    borderTopWidth: 1.5,
     borderStyle: 'dashed',
     borderColor: '#BDBDBD',
-    zIndex: -1, 
+    zIndex: -1,
   },
   dot: {
-    width: 12, 
+    width: 12,
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#fff', 
+    borderColor: '#fff',
     backgroundColor: '#333',
     position: 'absolute',
     left: '50%',
@@ -547,7 +579,7 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 14,
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
     color: '#111',
     marginBottom: 2,
     lineHeight: 18,
@@ -562,7 +594,7 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
   indicatorBar: {
-    height: 4, 
+    height: 4,
     width: '100%',
     borderRadius: 2,
   },
@@ -573,7 +605,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   addButton: {
-    backgroundColor: '#111', 
+    backgroundColor: '#111',
     borderRadius: 14,
     height: 52,
     alignItems: 'center',
@@ -586,7 +618,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
-    flexDirection: 'row', 
+    flexDirection: 'row',
     gap: 8,
   },
   addButtonText: {

@@ -1,5 +1,9 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -66,15 +70,16 @@ function RootLayoutNav() {
     if (isLoading) return;
 
     // Use string casting or checking to avoid rigid TS overlap error
-    const segment = segments[0] as string | undefined; 
-    
+    const segment = segments[0] as string | undefined;
+
     // Check if in auth group or welcome/login screen
-    const inAuthGroup = segment === '(auth)' || segment === 'login' || segment === 'welcome';
-    
+    const inAuthGroup =
+      segment === '(auth)' || segment === 'login' || segment === 'welcome';
+
     if (!session && !inAuthGroup) {
       // Redirect to welcome if not authenticated
       router.replace('/welcome');
-    } 
+    }
     // Remove auto-redirect to home for testing flow
     // else if (session && (segment === 'login' || segment === 'welcome')) {
     //   router.replace('/');
@@ -94,7 +99,9 @@ function RootLayoutNav() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ThemeProvider
+          value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+        >
           <Slot />
         </ThemeProvider>
       </QueryClientProvider>

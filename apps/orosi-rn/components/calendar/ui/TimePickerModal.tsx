@@ -1,6 +1,14 @@
 import Colors from '@/constants/Colors';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Dimensions, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Dimensions,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { GradientSelector } from './GradientSelector';
 
@@ -13,9 +21,17 @@ interface TimePickerModalProps {
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES_STEP = 5;
-const MINUTES = Array.from({ length: 60 / MINUTES_STEP }, (_, i) => i * MINUTES_STEP);
+const MINUTES = Array.from(
+  { length: 60 / MINUTES_STEP },
+  (_, i) => i * MINUTES_STEP,
+);
 
-export function TimePickerModal({ visible, onClose, onTimeSelect, initialTime }: TimePickerModalProps) {
+export function TimePickerModal({
+  visible,
+  onClose,
+  onTimeSelect,
+  initialTime,
+}: TimePickerModalProps) {
   const [selectedHour, setSelectedHour] = useState(0);
   const [selectedMinute, setSelectedMinute] = useState(0);
   const [manualMinute, setManualMinute] = useState('');
@@ -35,15 +51,15 @@ export function TimePickerModal({ visible, onClose, onTimeSelect, initialTime }:
   const handleManualMinuteChange = (text: string) => {
     // Only allow numbers
     const cleaned = text.replace(/[^0-9]/g, '');
-    
+
     // Limit to 2 digits
     if (cleaned.length > 2) return;
-    
+
     setManualMinute(cleaned);
-    
+
     const val = parseInt(cleaned, 10);
     if (!isNaN(val) && val >= 0 && val < 60) {
-        setSelectedMinute(val);
+      setSelectedMinute(val);
     }
   };
 
@@ -61,16 +77,16 @@ export function TimePickerModal({ visible, onClose, onTimeSelect, initialTime }:
   const hourIndex = HOURS.indexOf(selectedHour);
   // Find closest minute in our MINUTES array
   const minuteIndex = useMemo(() => {
-      let closest = 0;
-      let minDiff = 60;
-      MINUTES.forEach((m, i) => {
-          const diff = Math.abs(m - selectedMinute);
-          if (diff < minDiff) {
-              minDiff = diff;
-              closest = i;
-          }
-      });
-      return closest;
+    let closest = 0;
+    let minDiff = 60;
+    MINUTES.forEach((m, i) => {
+      const diff = Math.abs(m - selectedMinute);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = i;
+      }
+    });
+    return closest;
   }, [selectedMinute]);
 
   if (!visible) return null;
@@ -84,83 +100,98 @@ export function TimePickerModal({ visible, onClose, onTimeSelect, initialTime }:
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.overlay}>
-          <TouchableOpacity style={styles.backdrop} onPress={onClose} activeOpacity={1} />
+          <TouchableOpacity
+            style={styles.backdrop}
+            onPress={onClose}
+            activeOpacity={1}
+          />
           <View style={styles.content}>
-              <View style={styles.header}>
-                  <Text style={styles.title}>시간 설정</Text>
-                  
-                  {/* Time Display with Editable Minute */}
-                  <View style={styles.timeDisplay}>
-                      <Text style={styles.timeText}>
-                          {selectedHour.toString().padStart(2, '0')}
-                      </Text>
-                      <Text style={styles.colon}>:</Text>
-                      <TextInput
-                          style={styles.minuteInput}
-                          value={isEditingMinute ? manualMinute : selectedMinute.toString().padStart(2, '0')}
-                          onChangeText={handleManualMinuteChange}
-                          keyboardType="number-pad"
-                          onFocus={() => {
-                              setIsEditingMinute(true);
-                              setManualMinute(selectedMinute.toString().padStart(2, '0'));
-                          }}
-                          onBlur={() => setIsEditingMinute(false)}
-                          maxLength={2}
-                          selectTextOnFocus
-                      />
-                  </View>
+            <View style={styles.header}>
+              <Text style={styles.title}>시간 설정</Text>
+
+              {/* Time Display with Editable Minute */}
+              <View style={styles.timeDisplay}>
+                <Text style={styles.timeText}>
+                  {selectedHour.toString().padStart(2, '0')}
+                </Text>
+                <Text style={styles.colon}>:</Text>
+                <TextInput
+                  style={styles.minuteInput}
+                  value={
+                    isEditingMinute
+                      ? manualMinute
+                      : selectedMinute.toString().padStart(2, '0')
+                  }
+                  onChangeText={handleManualMinuteChange}
+                  keyboardType="number-pad"
+                  onFocus={() => {
+                    setIsEditingMinute(true);
+                    setManualMinute(selectedMinute.toString().padStart(2, '0'));
+                  }}
+                  onBlur={() => setIsEditingMinute(false)}
+                  maxLength={2}
+                  selectTextOnFocus
+                />
+              </View>
+            </View>
+
+            <View style={styles.selectorsResult}>
+              {/* Hour Selector */}
+              <View style={styles.selectorColumn}>
+                <Text style={styles.columnLabel}>시</Text>
+                <GradientSelector
+                  data={HOURS}
+                  itemWidth={60}
+                  height={200}
+                  containerWidth={60}
+                  initialIndex={hourIndex}
+                  selectedIndex={hourIndex}
+                  onIndexChanged={(index) => {
+                    const h = HOURS[index];
+                    setSelectedHour(h);
+                  }}
+                  orientation="vertical"
+                  itemHeight={40}
+                  renderItem={(item) => (
+                    <Text style={styles.itemText}>
+                      {item.toString().padStart(2, '0')}
+                    </Text>
+                  )}
+                />
               </View>
 
-              <View style={styles.selectorsResult}>
-                  {/* Hour Selector */}
-                  <View style={styles.selectorColumn}>
-                      <Text style={styles.columnLabel}>시</Text>
-                      <GradientSelector
-                          data={HOURS}
-                          itemWidth={60}
-                          height={200}
-                          containerWidth={60}
-                          initialIndex={hourIndex}
-                          selectedIndex={hourIndex}
-                          onIndexChanged={(index) => {
-                             const h = HOURS[index];
-                             setSelectedHour(h);
-                          }}
-                          orientation="vertical"
-                          itemHeight={40}
-                          renderItem={(item) => (
-                              <Text style={styles.itemText}>{item.toString().padStart(2, '0')}</Text>
-                          )}
-                      />
-                  </View>
-
-                  {/* Minute Selector */}
-                  <View style={styles.selectorColumn}>
-                       <Text style={styles.columnLabel}>분</Text>
-                       <GradientSelector
-                          data={MINUTES}
-                          itemWidth={60}
-                          height={200}
-                          containerWidth={60}
-                          initialIndex={minuteIndex}
-                          selectedIndex={minuteIndex}
-                          onIndexChanged={(index) => {
-                              const m = MINUTES[index];
-                              setSelectedMinute(m);
-                              setManualMinute(m.toString().padStart(2, '0'));
-                          }}
-                          orientation="vertical"
-                          itemHeight={40}
-                          renderItem={(item) => (
-                              <Text style={styles.itemText}>{item.toString().padStart(2, '0')}</Text>
-                          )}
-                      />
-                  </View>
+              {/* Minute Selector */}
+              <View style={styles.selectorColumn}>
+                <Text style={styles.columnLabel}>분</Text>
+                <GradientSelector
+                  data={MINUTES}
+                  itemWidth={60}
+                  height={200}
+                  containerWidth={60}
+                  initialIndex={minuteIndex}
+                  selectedIndex={minuteIndex}
+                  onIndexChanged={(index) => {
+                    const m = MINUTES[index];
+                    setSelectedMinute(m);
+                    setManualMinute(m.toString().padStart(2, '0'));
+                  }}
+                  orientation="vertical"
+                  itemHeight={40}
+                  renderItem={(item) => (
+                    <Text style={styles.itemText}>
+                      {item.toString().padStart(2, '0')}
+                    </Text>
+                  )}
+                />
               </View>
+            </View>
 
-              <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-                  <Text style={styles.confirmText}>완료</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={handleConfirm}
+            >
+              <Text style={styles.confirmText}>완료</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </GestureHandlerRootView>
@@ -196,52 +227,52 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: '#64748b',
-      marginBottom: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#64748b',
+    marginBottom: 12,
   },
   timeDisplay: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   timeText: {
-      fontSize: 40,
-      fontWeight: '700',
-      color: '#0f172a',
-      fontVariant: ['tabular-nums'],
+    fontSize: 40,
+    fontWeight: '700',
+    color: '#0f172a',
+    fontVariant: ['tabular-nums'],
   },
   colon: {
-      fontSize: 40,
-      fontWeight: '700',
-      color: '#0f172a',
-      marginHorizontal: 4,
-      marginTop: -4,
+    fontSize: 40,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginHorizontal: 4,
+    marginTop: -4,
   },
   minuteInput: {
-      fontSize: 40,
-      fontWeight: '700',
-      color: Colors.AppColors.primary,
-      fontVariant: ['tabular-nums'],
-      minWidth: 60,
-      textAlign: 'center',
-      padding: 0,
+    fontSize: 40,
+    fontWeight: '700',
+    color: Colors.AppColors.primary,
+    fontVariant: ['tabular-nums'],
+    minWidth: 60,
+    textAlign: 'center',
+    padding: 0,
   },
   selectorsResult: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: 16,
-      marginBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginBottom: 24,
   },
   selectorColumn: {
-      alignItems: 'center',
-      gap: 8,
+    alignItems: 'center',
+    gap: 8,
   },
   columnLabel: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: '#94a3b8',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#94a3b8',
   },
   itemText: {
     fontSize: 20,
@@ -249,16 +280,16 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
   confirmButton: {
-      backgroundColor: Colors.AppColors.primary,
-      paddingVertical: 12,
-      paddingHorizontal: 32,
-      borderRadius: 12,
-      width: '100%',
-      alignItems: 'center',
+    backgroundColor: Colors.AppColors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
   },
   confirmText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: '600',
-  }
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });

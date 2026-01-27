@@ -14,22 +14,22 @@ export default function TabOneScreen() {
   const containerWidth = Math.min(windowWidth, 1280);
 
   return (
-    <View style={[styles.container, { backgroundColor: Colors[colorScheme ?? 'light'].background }]} testID='app'>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: Colors[colorScheme ?? 'light'].background },
+      ]}
+      testID="app"
+    >
       <SafeAreaView style={{ flex: 1, alignItems: 'center' }}>
-         <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
-          <View 
-            style={[styles.contentContainer]} 
-            testID='app-content-container'
-          >
-              <CalendarHeader 
-                onOpenDrawer={() => {}}
-                width={containerWidth}
-              />
-              <CalendarGrid 
-                  width={containerWidth} 
-              />
-              <EventDetailModal />
-         </View>
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        />
+        <View style={[styles.contentContainer]} testID="app-content-container">
+          <CalendarHeader onOpenDrawer={() => {}} width={containerWidth} />
+          <CalendarGrid width={containerWidth} />
+          <EventDetailModal />
+        </View>
       </SafeAreaView>
     </View>
   );

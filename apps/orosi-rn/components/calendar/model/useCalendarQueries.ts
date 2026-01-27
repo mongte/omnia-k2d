@@ -31,22 +31,26 @@ const fetchEventDetail = async (eventId: string) => {
 
   const { data, error } = await supabase
     .from('events')
-    .select(`
+    .select(
+      `
       id, title, description, subtitle, start_time, end_time, color, is_all_day, priority,
       subtasks:event_subtasks (
         id, event_id, title, is_completed, order_index, created_at
       )
-    `)
+    `,
+    )
     .eq('id', eventId)
     .order('order_index', { foreignTable: 'event_subtasks', ascending: true })
     .single();
 
   const duration = Date.now() - start;
-  console.log(`[Supabase Latency] fetchEventDetail took ${duration}ms for event ${eventId}`);
+  console.log(
+    `[Supabase Latency] fetchEventDetail took ${duration}ms for event ${eventId}`,
+  );
 
   if (error) {
-      console.error('[Supabase Error]', error);
-      throw error;
+    console.error('[Supabase Error]', error);
+    throw error;
   }
   if (!data) throw new Error('Event not found');
 
@@ -81,8 +85,14 @@ export const useCalendarQueries = () => {
   // Mutation: Create Event
   const useCreateEvent = () => {
     return useMutation({
-      mutationFn: async (newEvent: Database['public']['Tables']['events']['Insert']) => {
-        const { data, error } = await supabase.from('events').insert(newEvent).select().single();
+      mutationFn: async (
+        newEvent: Database['public']['Tables']['events']['Insert'],
+      ) => {
+        const { data, error } = await supabase
+          .from('events')
+          .insert(newEvent)
+          .select()
+          .single();
         if (error) throw error;
         return data;
       },
@@ -96,14 +106,18 @@ export const useCalendarQueries = () => {
   // Mutation: Update Event
   const useUpdateEvent = () => {
     return useMutation({
-      mutationFn: async (updatedEvent: Database['public']['Tables']['events']['Update'] & { id: string }) => {
+      mutationFn: async (
+        updatedEvent: Database['public']['Tables']['events']['Update'] & {
+          id: string;
+        },
+      ) => {
         const { data, error } = await supabase
           .from('events')
           .update(updatedEvent)
           .eq('id', updatedEvent.id)
           .select()
           .single();
-        
+
         if (error) throw error;
         return data;
       },
@@ -117,8 +131,14 @@ export const useCalendarQueries = () => {
   // Mutation: Create Subtask
   const useCreateSubtask = () => {
     return useMutation({
-      mutationFn: async (newSubtask: Database['public']['Tables']['event_subtasks']['Insert']) => {
-        const { data, error } = await supabase.from('event_subtasks').insert(newSubtask).select().single();
+      mutationFn: async (
+        newSubtask: Database['public']['Tables']['event_subtasks']['Insert'],
+      ) => {
+        const { data, error } = await supabase
+          .from('event_subtasks')
+          .insert(newSubtask)
+          .select()
+          .single();
         if (error) throw error;
         return data;
       },
@@ -131,14 +151,18 @@ export const useCalendarQueries = () => {
   // Mutation: Update Subtask
   const useUpdateSubtask = () => {
     return useMutation({
-      mutationFn: async (updatedSubtask: Database['public']['Tables']['event_subtasks']['Update'] & { id: string }) => {
+      mutationFn: async (
+        updatedSubtask: Database['public']['Tables']['event_subtasks']['Update'] & {
+          id: string;
+        },
+      ) => {
         const { data, error } = await supabase
           .from('event_subtasks')
           .update(updatedSubtask)
           .eq('id', updatedSubtask.id)
           .select()
           .single();
-        
+
         if (error) throw error;
         return data;
       },
@@ -159,13 +183,13 @@ export const useCalendarQueries = () => {
           .eq('id', subtaskId)
           .select('event_id')
           .single();
-          
+
         if (error) throw error;
         return data;
       },
       onSuccess: (data) => {
         if (data?.event_id) {
-            queryClient.invalidateQueries({ queryKey: ['event', data.event_id] });
+          queryClient.invalidateQueries({ queryKey: ['event', data.event_id] });
         }
       },
     });
@@ -173,15 +197,18 @@ export const useCalendarQueries = () => {
 
   // Mutation: Delete Event
   const useDeleteEvent = () => {
-      return useMutation({
-          mutationFn: async (eventId: string) => {
-              const { error } = await supabase.from('events').delete().eq('id', eventId);
-              if (error) throw error;
-          },
-          onSuccess: () => {
-              queryClient.invalidateQueries({ queryKey: ['events'] });
-          },
-      });
+    return useMutation({
+      mutationFn: async (eventId: string) => {
+        const { error } = await supabase
+          .from('events')
+          .delete()
+          .eq('id', eventId);
+        if (error) throw error;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['events'] });
+      },
+    });
   };
 
   return {

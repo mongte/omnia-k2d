@@ -1,11 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect } from 'react';
-import {
-  Dimensions,
-  Platform,
-  StyleSheet,
-  View
-} from 'react-native';
+import { Dimensions, Platform, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Extrapolation,
@@ -30,7 +25,7 @@ interface GradientSelectorProps {
   renderItem: (
     item: any,
     index: number,
-    selectedness: SharedValue<number>
+    selectedness: SharedValue<number>,
   ) => React.ReactNode;
   onIndexChanged: (index: number) => void;
   onScrollStart?: () => void;
@@ -51,7 +46,10 @@ export function GradientSelector({
   containerWidth = 250,
   orientation = 'horizontal',
   itemHeight = 40,
-}: GradientSelectorProps & { orientation?: 'horizontal' | 'vertical'; itemHeight?: number }) {
+}: GradientSelectorProps & {
+  orientation?: 'horizontal' | 'vertical';
+  itemHeight?: number;
+}) {
   const scrollOffset = useSharedValue(0);
   const isHorizontal = orientation === 'horizontal';
   const itemSize = isHorizontal ? itemWidth : itemHeight;
@@ -115,14 +113,18 @@ export function GradientSelector({
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
-      scrollOffset.value = isHorizontal ? event.contentOffset.x : event.contentOffset.y;
+      scrollOffset.value = isHorizontal
+        ? event.contentOffset.x
+        : event.contentOffset.y;
     },
     onBeginDrag: () => {
       // @ts-ignore
       if (onScrollStart) runOnJS(onScrollStart)();
     },
     onMomentumEnd: (event) => {
-      const offset = isHorizontal ? event.contentOffset.x : event.contentOffset.y;
+      const offset = isHorizontal
+        ? event.contentOffset.x
+        : event.contentOffset.y;
       const index = Math.round(offset / itemSize);
       // @ts-ignore
       if (onScrollEnd) runOnJS(onScrollEnd)();
@@ -154,11 +156,11 @@ export function GradientSelector({
         distance,
         [0, itemSize],
         [1, 0],
-        Extrapolation.CLAMP
+        Extrapolation.CLAMP,
       );
 
       const scale = interpolate(selectedness, [0, 1], [0.8, 1.0]);
-      
+
       return {
         transform: [{ scale }],
         opacity: interpolate(selectedness, [0, 1], [0.4, 1]),
@@ -168,11 +170,11 @@ export function GradientSelector({
     return (
       <Animated.View
         style={[
-          { 
-              width: itemWidth, 
-              height: isHorizontal ? undefined : itemHeight, // Set fixed height in vertical mode
-              alignItems: 'center', 
-              justifyContent: 'center' 
+          {
+            width: itemWidth,
+            height: isHorizontal ? undefined : itemHeight, // Set fixed height in vertical mode
+            alignItems: 'center',
+            justifyContent: 'center',
           },
           animatedStyle,
         ]}
@@ -195,8 +197,8 @@ export function GradientSelector({
           snapToInterval={itemSize}
           decelerationRate="fast"
           contentContainerStyle={
-              isHorizontal 
-              ? { paddingHorizontal: spacerSize } 
+            isHorizontal
+              ? { paddingHorizontal: spacerSize }
               : { paddingVertical: spacerSize }
           }
           getItemLayout={getItemLayout}
@@ -213,45 +215,48 @@ export function GradientSelector({
 
       {/* Gradients */}
       {isHorizontal ? (
-          <>
-            <LinearGradient
-                colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={[StyleSheet.absoluteFill, { width: spacerSize }]}
-                pointerEvents="none"
-            />
-            <LinearGradient
-                colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={[
-                StyleSheet.absoluteFill,
-                { left: containerWidth - spacerSize, width: spacerSize },
-                ]}
-                pointerEvents="none"
-            />
-          </>
+        <>
+          <LinearGradient
+            colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={[StyleSheet.absoluteFill, { width: spacerSize }]}
+            pointerEvents="none"
+          />
+          <LinearGradient
+            colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={[
+              StyleSheet.absoluteFill,
+              { left: containerWidth - spacerSize, width: spacerSize },
+            ]}
+            pointerEvents="none"
+          />
+        </>
       ) : (
-          <>
-            <LinearGradient
-                colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
-                style={[StyleSheet.absoluteFill, { height: spacerSize, width: '100%' }]}
-                pointerEvents="none"
-            />
-            <LinearGradient
-                colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
-                style={[
-                StyleSheet.absoluteFill,
-                { top: height - spacerSize, height: spacerSize, width: '100%' },
-                ]}
-                pointerEvents="none"
-            />
-          </>
+        <>
+          <LinearGradient
+            colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0)']}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={[
+              StyleSheet.absoluteFill,
+              { height: spacerSize, width: '100%' },
+            ]}
+            pointerEvents="none"
+          />
+          <LinearGradient
+            colors={['rgba(255,255,255,0)', 'rgba(255,255,255,1)']}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={[
+              StyleSheet.absoluteFill,
+              { top: height - spacerSize, height: spacerSize, width: '100%' },
+            ]}
+            pointerEvents="none"
+          />
+        </>
       )}
     </View>
   );
